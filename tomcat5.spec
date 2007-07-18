@@ -67,7 +67,7 @@
 Name: tomcat5
 Epoch: 0
 Version: 5.5.23
-Release: %mkrel 9.2.2
+Release: %mkrel 9.2.3
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -137,7 +137,7 @@ BuildRequires: regexp >= 0:1.3
 BuildRequires: struts >= 0:1.2.7
 BuildRequires: xerces-j2 >= 0:2.7.1
 # xml-commons-apis is needed by Xerces-J2
-BuildRequires: xml-commons-apis >= 1.3
+BuildRequires: xml-commons-jaxp-1.3-apis >= 1.3
 # FIXME taglibs-standard is not listed in the Tomcat build.properties.default
 BuildRequires: jakarta-taglibs-standard >= 0:1.1.0
 # formerly non-free stuff
@@ -149,7 +149,7 @@ BuildRequires: jta >= 0:1.0.1
 BuildRequires: jaf >= 0:1.0.1
 # javamail can be provided by classpathx-mail
 BuildRequires: javamail >= 0:1.3.1
-Requires(post): xml-commons-apis >= 1.3
+Requires(post): xml-commons-jaxp-1.3-apis >= 1.3
 # libgcj aot-compiled native libraries
 %if %{gcj_support}
 BuildRequires:          java-gcj-compat-devel >= 1.0.43
@@ -172,7 +172,7 @@ Requires(pre):          %{_sbindir}/groupadd
 Requires: jpackage-utils >= 0:1.6.0
 # xml parsing packages
 Requires: xerces-j2 >= 0:2.7.1
-Requires: xml-commons-apis >= 1.3
+Requires: xml-commons-jaxp-1.3-apis >= 1.3
 # jakarta-commons packages
 Requires: jakarta-commons-daemon >= 1.0.1
 Requires: jakarta-commons-launcher >= 0:0.9
@@ -466,7 +466,7 @@ jsp-api.jar=${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr152/d
 tools.jar=%{java.home}/lib/tools.jar
 xerces.jar=$(build-classpath xerces-j2)
 xercesImpl.jar=$(build-classpath jaxp_parser_impl)
-xmlParserAPIs.jar=$(build-classpath xml-commons-apis)
+xmlParserAPIs.jar=$(build-classpath xml-commons-jaxp-1.3-apis)
 commons-el.jar=$(build-classpath commons-el)
 commons-collections.jar=$(build-classpath commons-collections)
 commons-logging.jar=$(build-classpath commons-logging)
@@ -507,7 +507,7 @@ servlet-api.jar=${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr1
 jsp-api.jar=${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr152/dist/lib/jsp-api.jar
 servlet.doc=${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr154/dist/docs/api
 xercesImpl.jar=$(build-classpath jaxp_parser_impl)
-xml-apis.jar=$(build-classpath xml-commons-apis)
+xml-apis.jar=$(build-classpath xml-commons-jaxp-1.3-apis)
 struts.jar=$(build-classpath struts)
 struts.lib=%{_datadir}/struts
 activation.jar=$(build-classpath jaf)
@@ -567,7 +567,7 @@ popd
 %{__rm} -rf $RPM_BUILD_ROOT
 %{__install} -d -m 755 ${RPM_BUILD_ROOT}%{_javadir}
 %if %{without_apisonly}
-export CLASSPATH=$(build-classpath xalan-j2 xml-commons-apis jakarta-taglibs-core jakarta-taglibs-standard):${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr152/dist/lib/jsp-api.jar
+export CLASSPATH=$(build-classpath xalan-j2 xml-commons-jaxp-1.3-apis jakarta-taglibs-core jakarta-taglibs-standard):${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr152/dist/lib/jsp-api.jar
 # build initial path structure
 %{__install} -d -m 755 \
     ${RPM_BUILD_ROOT}{%{confdir},%{logdir},%{homedir},%{bindir}}
@@ -879,7 +879,7 @@ done
 # Create automated links - since all needed extensions may not have been
 # installed for this jvm output is muted
 build-jar-repository %{commondir}/endorsed jaxp_parser_impl \
-    xml-commons-apis 2>&1
+    xml-commons-jaxp-1.3-apis 2>&1
 build-jar-repository %{commondir}/lib commons-collections-tomcat5 \
     commons-dbcp-tomcat5 commons-el commons-pool-tomcat5 javamail jsp \
     %{name}/naming-factory %{name}/naming-resources servlet \
