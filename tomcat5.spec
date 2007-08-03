@@ -67,7 +67,7 @@
 Name: tomcat5
 Epoch: 0
 Version: 5.5.23
-Release: %mkrel 9.2.3
+Release: %mkrel 9.2.4
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -107,7 +107,7 @@ BuildArch: noarch
 Buildrequires: jpackage-utils >= 0:1.6.0
 BuildRequires: ant >= 0:1.6.2
 %if %{without_apisonly}
-BuildRequires: java-devel >= 0:1.4.2
+BuildRequires: java-gcj-compat-devel >= 0:1.4.2
 %endif
 %if %{without_apisonly}
 %if %{with_ecj}
@@ -177,7 +177,7 @@ Requires: xml-commons-jaxp-1.3-apis >= 1.3
 Requires: jakarta-commons-daemon >= 1.0.1
 Requires: jakarta-commons-launcher >= 0:0.9
 # alternatives
-Requires: java-devel >= 0:1.4.2
+Requires: java-gcj-compat-devel >= 0:1.4.2
 Requires: jndi-ldap
 # And it needs its own API subpackages for running
 Requires: %{name}-common-lib = %{epoch}:%{version}-%{release}
@@ -446,12 +446,12 @@ popd
 # build jspapi and servletapi as ant dist will require them later
 pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi
     pushd jsr154
-        ant -Dservletapi.build="build" \
+        %{ant} -Dservletapi.build="build" \
             -Dservletapi.dist="dist" \
             -Dbuild.compiler="modern" dist
     popd
     pushd jsr152
-        ant -Dservletapi.build="build" \
+        %{ant} -Dservletapi.build="build" \
             -Dservletapi.dist="dist" \
             -Dbuild.compiler="modern" dist
     popd
@@ -474,7 +474,7 @@ commons-daemon.jar=$(build-classpath commons-daemon)
 junit.jar=$(build-classpath junit)
 jasper-compiler-jdt.jar=$(build-classpath eclipse-ecj)
 EOBP
-    ant -Djava.home="%{java_home}" -Dbuild.compiler="modern" javadoc
+    %{ant} -Djava.home="%{java_home}" -Dbuild.compiler="modern" javadoc
 popd
 
 # build tomcat 5
@@ -522,10 +522,10 @@ jsse.jar=$(build-classpath jsse/jsse)
 servletapi.build.notrequired=true
 jspapi.build.notrequired=true
 EOBP
-ant -Dbuild.compiler="modern" -Djava.home="%{java_home}" init
+%{ant} -Dbuild.compiler="modern" -Djava.home="%{java_home}" init
 cp ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr154/dist/lib/servlet-api.jar \
         ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/build/build/common/lib/servlet-api.jar
-    ant -Dbuild.compiler="modern" -Djava.home="%{java_home}" build
+    %{ant} -Dbuild.compiler="modern" -Djava.home="%{java_home}" build
 popd
 # build the connectors
 pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/connectors
@@ -559,7 +559,7 @@ jnet.jar=$(build-classpath jsse/jnet)
 jsse.jar=$(build-classpath jsse/jsse)
 tomcat5.home=../../build/build
 EOBP
-    ant -Dbuild.compiler="modern" -Djava.home="%{java_home}" build
+    %{ant} -Dbuild.compiler="modern" -Djava.home="%{java_home}" build
 popd
 %endif
 
@@ -621,7 +621,7 @@ EOT
 pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/build
     export usejikes="false"
     export OPT_JAR_LIST="ant/ant-trax xalan-j2-serializer"
-    ant -Dbuild.compiler="modern" -Djava.home=%{java_home} dist
+    %{ant} -Dbuild.compiler="modern" -Djava.home=%{java_home} dist
     pushd dist
         %{__mv} bin/* ${RPM_BUILD_ROOT}%{bindir}
         %{__mv} common/* ${RPM_BUILD_ROOT}%{commondir}
