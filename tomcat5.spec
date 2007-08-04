@@ -107,7 +107,7 @@ BuildArch: noarch
 Buildrequires: jpackage-utils >= 0:1.6.0
 BuildRequires: ant >= 0:1.6.2
 %if %{without_apisonly}
-BuildRequires: java-gcj-compat-devel >= 0:1.4.2
+BuildRequires: java-gcj-compat-devel
 %endif
 %if %{without_apisonly}
 %if %{with_ecj}
@@ -177,7 +177,7 @@ Requires: xml-commons-jaxp-1.3-apis >= 1.3
 Requires: jakarta-commons-daemon >= 1.0.1
 Requires: jakarta-commons-launcher >= 0:0.9
 # alternatives
-Requires: java-gcj-compat-devel >= 0:1.4.2
+Requires: java-gcj-compat-devel
 Requires: jndi-ldap
 # And it needs its own API subpackages for running
 Requires: %{name}-common-lib = %{epoch}:%{version}-%{release}
