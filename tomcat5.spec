@@ -67,7 +67,7 @@
 Name: tomcat5
 Epoch: 0
 Version: 5.5.23
-Release: %mkrel 9.2.4
+Release: %mkrel 9.2.6
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -79,6 +79,9 @@ Source2: %{name}-%{majversion}.conf
 Source3: %{name}-%{majversion}.wrapper
 Source4: %{name}-%{majversion}.logrotate
 Source5: %{name}-%{majversion}.relink
+Source6: %{name}-jasper5-MANIFEST.MF
+Source7: %{name}-servlet-MANIFEST.MF
+Source8: %{name}-jsp-MANIFEST.MF
 Patch0: %{name}-%{majversion}.link_admin_jar.patch
 Patch1: %{name}-%{majversion}-skip-build-on-install.patch
 Patch2: %{name}-%{majversion}-jt5-build.patch
@@ -562,6 +565,20 @@ EOBP
     %{ant} -Dbuild.compiler="modern" -Djava.home="%{java_home}" build
 popd
 %endif
+
+mkdir META-INF
+
+cp -a %{SOURCE6} META-INF/MANIFEST.MF
+zip ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/build/build/common/lib/%{jname}-compiler.jar META-INF/MANIFEST.MF
+rm META-INF/MANIFEST.MF
+
+cp -a %{SOURCE7} META-INF/MANIFEST.MF
+zip ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr154/dist/lib/servlet-api.jar META-INF/MANIFEST.MF
+rm META-INF/MANIFEST.MF
+
+cp -a %{SOURCE8} META-INF/MANIFEST.MF
+zip ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr152/dist/lib/jsp-api.jar META-INF/MANIFEST.MF
+rm META-INF/MANIFEST.MF
 
 %install
 %{__rm} -rf $RPM_BUILD_ROOT
