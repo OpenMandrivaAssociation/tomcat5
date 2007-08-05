@@ -67,7 +67,7 @@
 Name: tomcat5
 Epoch: 0
 Version: 5.5.23
-Release: %mkrel 9.2.6
+Release: %mkrel 9.2.7
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -400,18 +400,6 @@ Javadoc for generated documentation %{name}-%{jname}
 %endif
 
 %prep
-%{__cat} << EOT
-
-                If you want only apis to be built,
-                give rpmbuild option '--with apisonly'
-
-                If you don''t want direct ecj support to be built in,
-                while eclipse-ecj isn''t available,
-                give rpmbuild option '--without ecj'
-
-EOT
-%{__rm} -rf ${RPM_BUILD_DIR}/%{name}-%{version}
-
 %setup -q -c -T -a 0
 cd %{packdname}
 %patch0 -b .p0
@@ -568,10 +556,6 @@ popd
 
 mkdir META-INF
 
-cp -a %{SOURCE6} META-INF/MANIFEST.MF
-zip ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/build/build/common/lib/%{jname}-compiler.jar META-INF/MANIFEST.MF
-rm META-INF/MANIFEST.MF
-
 cp -a %{SOURCE7} META-INF/MANIFEST.MF
 zip ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr154/dist/lib/servlet-api.jar META-INF/MANIFEST.MF
 rm META-INF/MANIFEST.MF
@@ -579,6 +563,15 @@ rm META-INF/MANIFEST.MF
 cp -a %{SOURCE8} META-INF/MANIFEST.MF
 zip ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr152/dist/lib/jsp-api.jar META-INF/MANIFEST.MF
 rm META-INF/MANIFEST.MF
+
+mkdir tmp
+pushd tmp
+jar xf ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/build/build/common/lib/%{jname}-compiler.jar
+jar xf ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/build/build/common/lib/%{jname}-runtime.jar
+cp -a %{SOURCE6} META-INF/MANIFEST.MF
+zip -r ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/build/build/common/lib/%{jname}.jar *
+popd
+rm -r tmp
 
 %install
 %{__rm} -rf $RPM_BUILD_ROOT
@@ -763,8 +756,8 @@ pushd ${RPM_BUILD_ROOT}%{commondir}/lib
     find . -name "*.jar" -not -name "%{jname}*" \
         -not -name "naming*" | xargs -t %{__rm} -f
     # jasper's jars will be installed in a public repository
-    for i in %{jname}-compiler %{jname}-runtime; do
-        j="`echo $i | %{__sed} -e 's|%{jname}-|%{jname}5-|'`"
+    for i in %{jname}-compiler %{jname}-runtime %{jname}; do
+        j="`echo $i | %{__sed} -e 's|%{jname}|%{jname}5|'`"
         %{__mv} ${i}.jar ${RPM_BUILD_ROOT}%{_javadir}/${j}-%{version}.jar
         pushd ${RPM_BUILD_ROOT}%{_javadir}
             %{__ln_s} -f ${j}-%{version}.jar ${j}.jar
@@ -867,7 +860,7 @@ popd
 
 %if %{gcj_support}
 # Remove non-standard jars from the list for aot compilation 
-aot-compile-rpm \
+%{_bindir}/aot-compile-rpm \
     --exclude var/lib/%{name}/webapps/tomcat-docs/appdev/sample/sample.war \
     --exclude var/lib/%{name}/webapps/servlets-examples/WEB-INF/classes \
     --exclude var/lib/%{name}/webapps/jsp-examples/WEB-INF/classes \
@@ -1204,7 +1197,7 @@ fi
 %files %{jname}
 %defattr(644,root,root,755)
 %doc ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/%{jname}/doc/jspc.html
-%{_javadir}/%{jname}5-*.jar
+%{_javadir}/%{jname}5*.jar
 %attr(755,root,root) %{_bindir}/%{jname}*.sh
 %attr(755,root,root) %{_bindir}/jspc*.sh
 %if %{gcj_support}
