@@ -161,13 +161,13 @@ Requires(postun):       java-gcj-compat >= 1.0.31
 %endif
 Requires(post):         jpackage-utils >= 0:1.6.0
 Requires(post):         /bin/rm
-Requires(post):         /sbin/chkconfig
+Requires(post):         chkconfig
 Requires(post):         jakarta-commons-dbcp-tomcat5
 Requires(post):         jakarta-commons-collections-tomcat5
 Requires(post):         jakarta-commons-pool-tomcat5
 Requires(post):         findutils
 Requires(preun):        /bin/rm
-Requires(post):         /sbin/chkconfig
+Requires(post):         chkconfig
 Requires(preun):        findutils
 Requires(pre):          %{_sbindir}/useradd
 Requires(pre):          %{_sbindir}/groupadd
@@ -245,15 +245,15 @@ The administrative web applications (admin and manager) for Apache Tomcat
 
 %package servlet-%{servletspec}-api
 Group: Development/Java
-Requires: /usr/sbin/update-alternatives
+Requires: update-alternatives
 Summary: Apache Tomcat Servlet implementation classes
 Obsoletes: servletapi5
 Provides: servlet
 Provides: servlet5
 Provides: servlet24
 Provides: servletapi5
-Requires(post):         /sbin/chkconfig
-requires(postun):       /sbin/chkconfig
+Requires(post):         chkconfig
+requires(postun):       chkconfig
 
 %if %{gcj_support}
 # libgcj aot-compiled native libraries
@@ -279,7 +279,7 @@ of the Apache Tomcat Servlet and JSP APIs (packages javax.servlet).
 
 %package jsp-%{jspspec}-api
 Group: Development/Java
-Requires: /usr/sbin/update-alternatives
+Requires: update-alternatives
 Requires: servlet24
 # We need this to indirectly get rid of legacy jsp included in old
 # servlet packages (one day we will be able to remove this)
@@ -288,8 +288,8 @@ Requires(pre):          %{name}-servlet-%{servletspec}-api = %{epoch}:%{version}
 Requires(postun):       %{name}-servlet-%{servletspec}-api = %{epoch}:%{version}-%{release}
 Summary: Apache Tomcat Servlet and JSP implementation classes
 Provides: jsp
-Requires(post):         /sbin/chkconfig
-Requires(postun):       /sbin/chkconfig
+Requires(post):         chkconfig
+Requires(postun):       chkconfig
 
 %if %{gcj_support}
 # libgcj aot-compiled native libraries
@@ -1263,7 +1263,7 @@ fi
 
 * Tue Apr 24 2007 Jason Corley <jason.corley@gmail.com> 0:5.5.23-7jpp
 - bug 253: init script should be in /etc/init.d per LSB (Ralf Hansen)
-- bug 257: require /sbin/chkconfig since SuSE has no package chkconfig
+- bug 257: require chkconfig since SuSE has no package chkconfig
   (Ralf Hansen)
 - bug 261: jasper5.sh tries to use non-existant jars (Vivek Lakshmanan)
 
