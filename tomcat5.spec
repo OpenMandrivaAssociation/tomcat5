@@ -67,7 +67,7 @@
 Name: tomcat5
 Epoch: 0
 Version: 5.5.23
-Release: %mkrel 9.2.8
+Release: %mkrel 9.2.9
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -156,8 +156,6 @@ Requires(post): xml-commons-jaxp-1.3-apis >= 1.3
 # libgcj aot-compiled native libraries
 %if %{gcj_support}
 BuildRequires:          java-gcj-compat-devel >= 1.0.43
-Requires(post):         java-gcj-compat >= 1.0.31
-Requires(postun):       java-gcj-compat >= 1.0.31
 %endif
 Requires(post):         jpackage-utils >= 0:1.6.0
 Requires(post):         /bin/rm
@@ -213,10 +211,6 @@ Requires(post):         jpackage-utils >= 0:1.6.0
 Requires(preun):        findutils
 Requires(preun):        /bin/rm
 
-%if %{gcj_support}
-Requires(post):         java-gcj-compat >= 1.0.31
-Requires(postun):       java-gcj-compat >= 1.0.31
-%endif
 
 %description webapps
 Web applications for Apache Tomcat
@@ -234,10 +228,6 @@ Requires(post):         findutils
 Requires(preun):        findutils
 Requires(preun):        /bin/rm
 
-%if %{gcj_support}
-Requires(post):         java-gcj-compat >= 1.0.31
-Requires(postun):       java-gcj-compat >= 1.0.31
-%endif
 
 %description admin-webapps
 The administrative web applications (admin and manager) for Apache Tomcat
@@ -254,12 +244,6 @@ Provides: servlet24
 Provides: servletapi5
 Requires(post):         chkconfig
 requires(postun):       chkconfig
-
-%if %{gcj_support}
-# libgcj aot-compiled native libraries
-Requires(post):         java-gcj-compat >= 1.0.31
-Requires(postun):       java-gcj-compat >= 1.0.31
-%endif
 
 %description servlet-%{servletspec}-api
 Contains the implementation classes
@@ -290,12 +274,6 @@ Summary: Apache Tomcat Servlet and JSP implementation classes
 Provides: jsp
 Requires(post):         chkconfig
 Requires(postun):       chkconfig
-
-%if %{gcj_support}
-# libgcj aot-compiled native libraries
-Requires(post):         java-gcj-compat >= 1.0.31
-Requires(postun):       java-gcj-compat >= 1.0.31
-%endif
 
 %description jsp-%{jspspec}-api
 Contains the implementation classes
@@ -342,12 +320,6 @@ Requires(preun):        findutils
 Requires(post):         /bin/rm
 Requires(preun):        /bin/rm
 
-%if %{gcj_support}
-# libgcj aot-compiled native libraries
-Requires(post):         java-gcj-compat >= 1.0.31
-Requires(postun):       java-gcj-compat >= 1.0.31
-%endif
-
 %description common-lib
 Libraries needed to run the Tomcat Web container (part)
 
@@ -364,11 +336,6 @@ Requires(post):         findutils
 Requires(preun):        findutils
 Requires(post):         /bin/rm
 Requires(preun):        /bin/rm
-%if %{gcj_support}
-# libgcj aot-compiled native libraries
-Requires(post):         java-gcj-compat >= 1.0.31
-Requires(postun):       java-gcj-compat >= 1.0.31
-%endif
 
 %description server-lib
 Libraries needed to run the Tomcat Web container (part)
@@ -379,12 +346,6 @@ Requires: %{name}-servlet-%{servletspec}-api = %{epoch}:%{version}-%{release}
 Summary: Compiler JARs and associated scripts for %{name}
 Obsoletes: jasper5
 Provides: jasper5
-
-%if %{gcj_support}
-# libgcj aot-compiled native libraries
-Requires(post):         java-gcj-compat >= 1.0.31
-Requires(postun):       java-gcj-compat >= 1.0.31
-%endif
 
 %description %{jname}
 Compiler JARs and associated scripts for %{name}
