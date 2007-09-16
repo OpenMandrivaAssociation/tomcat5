@@ -67,7 +67,7 @@
 Name: tomcat5
 Epoch: 0
 Version: 5.5.23
-Release: %mkrel 9.2.9
+Release: %mkrel 9.2.10
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -865,32 +865,32 @@ build-jar-repository %{serverdir}/lib catalina-ant5 commons-modeler \
     %{name}/tomcat-ajp %{name}/tomcat-apr %{name}/tomcat-coyote \
     %{name}/tomcat-http %{name}/tomcat-jkstatus-ant %{name}/tomcat-util 2>&1
 %if %{gcj_support}
-    %{_bindir}/rebuild-gcj-db
+    %{update_gcjdb}
 %endif
 
 %if %{gcj_support}
 %postun
-%{_bindir}/rebuild-gcj-db
+%{clean_gcjdb}
 %endif
 
 %if %{gcj_support}
 %post common-lib
-%{_bindir}/rebuild-gcj-db
+%{update_gcjdb}
 %endif
 
 %if %{gcj_support}
 %postun common-lib
-%{_bindir}/rebuild-gcj-db
+%{clean_gcjdb}
 %endif
 
 %if %{gcj_support}
 %post server-lib
-%{_bindir}/rebuild-gcj-db
+%{update_gcjdb}
 %endif
 
 %if %{gcj_support}
 %postun server-lib
-%{_bindir}/rebuild-gcj-db
+%{clean_gcjdb}
 %endif
 
 %post webapps 
@@ -899,12 +899,12 @@ build-jar-repository %{serverdir}/lib catalina-ant5 commons-modeler \
 build-jar-repository %{appdir}/jsp-examples/WEB-INF/lib \
     jakarta-taglibs-core jakarta-taglibs-standard 2>&1
 %if %{gcj_support}
-    %{_bindir}/rebuild-gcj-db
+    %{update_gcjdb}
 %endif
 
 %if %{gcj_support}
 %postun webapps
-    %{_bindir}/rebuild-gcj-db
+    %{clean_gcjdb}
 %endif
 
 %post admin-webapps
@@ -920,12 +920,12 @@ build-jar-repository %{serverdir}/webapps/host-manager/WEB-INF/lib \
 build-jar-repository %{serverdir}/webapps/manager/WEB-INF/lib \
     commons-fileupload %{name}/catalina-manager 2>&1
 %if %{gcj_support}
-    %{_bindir}/rebuild-gcj-db
+    %{update_gcjdb}
 %endif
 
 %if %{gcj_support}
 %postun admin-webapps
-    %{_bindir}/rebuild-gcj-db
+    %{clean_gcjdb}
 %endif
 %endif
 
@@ -933,7 +933,7 @@ build-jar-repository %{serverdir}/webapps/manager/WEB-INF/lib \
 update-alternatives --install %{_javadir}/servlet.jar servlet \
     %{_javadir}/%{name}-servlet-%{servletspec}-api.jar 20400
 %if %{gcj_support}
-    %{_bindir}/rebuild-gcj-db
+    %{update_gcjdb}
 %endif
 
 %post servlet-%{servletspec}-api-javadoc
@@ -948,7 +948,7 @@ if [ "$1" = "0" ]; then
         %{_javadir}/%{name}-servlet-%{servletspec}-api.jar
 fi
 %if %{gcj_support}
-    %{_bindir}/rebuild-gcj-db
+    %{clean_gcjdb}
 %endif
 
 %post jsp-%{jspspec}-api
@@ -956,7 +956,7 @@ update-alternatives --install %{_javadir}/jsp.jar jsp \
     %{_javadir}/%{name}-jsp-%{jspspec}-api.jar 20000
 
 %if %{gcj_support}
-    %{_bindir}/rebuild-gcj-db
+    %{update_gcjdb}
 %endif
 
 
@@ -972,7 +972,7 @@ if [ "$1" = "0" ]; then
         %{_javadir}/%{name}-jsp-%{jspspec}-api.jar
 fi
 %if %{gcj_support}
-    %{_bindir}/rebuild-gcj-db
+    %{clean_gcjdb}
 %endif
 
 %if %{without_apisonly}
