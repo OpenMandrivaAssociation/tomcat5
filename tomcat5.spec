@@ -67,7 +67,7 @@
 Name: tomcat5
 Epoch: 0
 Version: 5.5.23
-Release: %mkrel 9.2.10
+Release: %mkrel 9.2.11
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -107,7 +107,7 @@ BuildRoot: %{_tmppath}/%{name}-%{epoch}-%{version}-%{release}-root
 BuildArch: noarch
 %endif
 
-Buildrequires: jpackage-utils >= 0:1.6.0
+Buildrequires: java-rpmbuild >= 0:1.6.0
 BuildRequires: ant >= 0:1.6.2
 %if %{without_apisonly}
 BuildRequires: java-gcj-compat-devel
