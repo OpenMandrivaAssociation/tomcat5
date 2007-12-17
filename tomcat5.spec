@@ -102,7 +102,6 @@ Patch18: %{name}-%{majversion}-skip-jsp-precompile.patch
 # Seems to be only needed when building with ECJ for java 1.5 since
 # the default source type for ecj is still 1.4
 Patch19: %{name}-%{majversion}-connectors-util-build.patch
-BuildRoot: %{_tmppath}/%{name}-%{epoch}-%{version}-%{release}-root
 %if ! %{gcj_support}
 BuildArch: noarch
 %endif
