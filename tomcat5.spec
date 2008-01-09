@@ -488,7 +488,7 @@ popd
 %{__rm} -rf $RPM_BUILD_ROOT
 %{__install} -d -m 755 ${RPM_BUILD_ROOT}%{_javadir}
 %if %{without_apisonly}
-export CLASSPATH="%(build-classpath xalan-j2 xml-commons-jaxp-1.3-apis jakarta-taglibs-core jakarta-taglibs-standard):${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr152/dist/lib/jsp-api.jar"
+export CLASSPATH="$(build-classpath xalan-j2 xml-commons-jaxp-1.3-apis jakarta-taglibs-core jakarta-taglibs-standard):${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr152/dist/lib/jsp-api.jar"
 # build initial path structure
 %{__install} -d -m 755 \
     ${RPM_BUILD_ROOT}{%{confdir},%{logdir},%{homedir},%{bindir}}
