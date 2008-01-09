@@ -71,7 +71,7 @@
 Name: tomcat5
 Epoch: 0
 Version: %{majversion}.%{minversion}
-Release: %mkrel 1.0.1
+Release: %mkrel 1.2.1
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -83,6 +83,9 @@ Source2: %{name}-%{majversion}.conf
 Source3: %{name}-%{majversion}.wrapper
 Source4: %{name}-%{majversion}.logrotate
 Source5: %{name}-%{majversion}.relink
+Source6: jasper-OSGi-MANIFEST.MF
+Source7: servlet-api-OSGi-MANIFEST.MF
+Source8: jsp-api-OSGi-MANIFEST.MF
 Patch0: %{name}-%{majversion}.link_admin_jar.patch
 Patch1: %{name}-%{majversion}-skip-build-on-install.patch
 Patch2: %{name}-%{majversion}-jt5-build.patch
@@ -94,8 +97,18 @@ Patch8: %{name}-%{majversion}-jasper.sh.patch
 Patch9: %{name}-%{majversion}-jspc.sh.patch
 Patch10: %{name}-%{majversion}-setclasspath.sh.patch
 Patch12: %{name}-%{majversion}-util-build.patch
-Patch13: %{name}-%{version}-http11-build.patch
+Patch13: %{name}-%{majversion}-http11-build.patch
 Patch14: %{name}-%{majversion}-jk-build.patch
+Patch16: %{name}-%{majversion}-jspc-classpath.patch
+#FIXME Disable JSP pre-compilation on ppc64, x390x and alpha
+Patch18: %{name}-%{majversion}-skip-jsp-precompile.patch
+# XXX:
+# Seems to be only needed when building with ECJ for java 1.5 since
+# the default source type for ecj is still 1.4
+Patch19: %{name}-%{majversion}-connectors-util-build.patch
+Patch20: %{name}-%{majversion}-webdav.patch
+Patch21: %{name}-%{majversion}-acceptlangheader.patch
+
 BuildRoot: %{_tmppath}/%{name}-%{epoch}-%{version}-%{release}-root
 %if ! %{gcj_support}
 BuildArch: noarch
@@ -154,6 +167,10 @@ Requires(post): rpm-helper
 Requires(post): findutils
 Requires(preun): findutils
 Requires(pre): rpm-helper
+# Fedora
+Requires(post):         jakarta-commons-dbcp-tomcat5
+Requires(post):         jakarta-commons-collections-tomcat5
+Requires(post):         jakarta-commons-pool-tomcat5
 %endif
 Requires: jpackage-utils >= 0:1.6.0
 # xml parsing packages
@@ -168,6 +185,10 @@ Requires: jndi-ldap
 # And it needs its own API subpackages for running
 Requires: %{name}-common-lib = %{epoch}:%{version}-%{release}
 Requires: %{name}-server-lib = %{epoch}:%{version}-%{release}
+# Fedora
+# And it needs its own API subpackages before being installed
+Requires(post): %{name}-common-lib = %{epoch}:%{version}-%{release}
+Requires(post): %{name}-server-lib = %{epoch}:%{version}-%{release}
 
 %description
 Tomcat is the servlet container that is used in the official Reference
@@ -334,6 +355,16 @@ Provides: jasper5-javadoc
 Javadoc for generated documentation %{name}-%{jname}
 %endif
 
+%if %{with_ecj}
+%package jasper-eclipse
+Group: Development/Java
+Summary: Jasper OSGi Eclipse plugin
+
+%description jasper-eclipse
+Jasper OSGi Eclipse plugin that contains class files from jasper-compiler,
+jasper-runtime and ECJ.
+%endif
+
 %prep
 %{__rm} -rf ${RPM_BUILD_DIR}/%{name}-%{version}
 
@@ -352,6 +383,14 @@ cd %{packdname}
 %patch12 -b .p12
 %patch13 -b .p13
 %patch14 -b .p14
+%patch16 -b .p16
+%ifarch ppc64 s390x alpha
+%patch18 -b .p18
+%endif
+%patch19 -b .p19
+%patch20 -b .p20
+%patch21 -b .p21
+
 %if %{without_ecj}
     %{__rm} %{jname}/src/share/org/apache/jasper/compiler/JDTCompiler.java
 %endif
@@ -450,6 +489,28 @@ cp ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr154/dist/lib/s
         ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/build/build/common/lib/servlet-api.jar
     %{ant} -Dbuild.compiler="modern" -Djava.home="%{java_home}" build
 popd
+
+# create jasper-eclipse jar
+%if %{with_ecj}
+mkdir org.apache.jasper
+pushd org.apache.jasper
+unzip -qq ../apache-tomcat-5.5.25-src/build/build/common/lib/jasper-compiler.jar
+unzip -qq ../apache-tomcat-5.5.25-src/build/build/common/lib/jasper-runtime.jar \
+  -x META-INF/MANIFEST.MF org/apache/jasper/compiler/Localizer.class
+unzip -qq %{_javadir}/jdtcore.jar -x META-INF/MANIFEST.MF
+cp %{SOURCE6} META-INF/MANIFEST.MF
+rm -f plugin.properties plugin.xml about.html jdtCompilerAdapter.jar META-INF/eclipse.inf
+zip -qq -r ../org.apache.jasper_5.5.17.v200706111724.jar .
+popd
+%endif
+
+# inject OSGi manifests
+mkdir META-INF
+cp %{SOURCE7} META-INF/MANIFEST.MF
+zip -u %{packdname}/servletapi/jsr154/dist/lib/servlet-api.jar META-INF/MANIFEST.MF
+cp %{SOURCE8} META-INF/MANIFEST.MF
+zip -u %{packdname}/servletapi/jsr152/dist/lib/jsp-api.jar META-INF/MANIFEST.MF
+
 # build the connectors
 pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/connectors
 # use the JARs created above to build
@@ -492,9 +553,11 @@ export CLASSPATH="$(build-classpath xalan-j2 xml-commons-jaxp-1.3-apis jakarta-t
 # build initial path structure
 %{__install} -d -m 755 \
     ${RPM_BUILD_ROOT}{%{confdir},%{logdir},%{homedir},%{bindir}}
+touch ${RPM_BUILD_ROOT}%{logdir}/catalina.out
 %{__install} -d -m 755 ${RPM_BUILD_ROOT}{%{serverdir},%{tempdir},%{workdir}}
 %{__install} -d -m 755 ${RPM_BUILD_ROOT}{%{appdir},%{commondir},%{shareddir}}
-%{__install} -d -m 755 ${RPM_BUILD_ROOT}%{_sysconfdir}/{init.d,logrotate.d}
+%{__install} -d -m 755 ${RPM_BUILD_ROOT}%{_sysconfdir}/logrotate.d
+%{__install} -d -m 755 ${RPM_BUILD_ROOT}%{_initrddir}
 %{__install} -d -m 755 ${RPM_BUILD_ROOT}%{_bindir}
 %{__install} -d -m 755 ${RPM_BUILD_ROOT}%{_javadir}/%{name}
 %{__install} -m 755 %{SOURCE5} ${RPM_BUILD_ROOT}%{bindir}/relink
@@ -522,7 +585,7 @@ EOT
 %{__install} -m 0644 %{name} ${RPM_BUILD_ROOT}%{_sysconfdir}/sysconfig/%{name}
 %{__rm} %{name}
 %{__install} %{SOURCE1} \
-    ${RPM_BUILD_ROOT}%{_sysconfdir}/init.d/%{name}
+    ${RPM_BUILD_ROOT}%{_initrddir}/%{name}
 # Global configuration file
 %{__install} -d -m 0755 ${RPM_BUILD_ROOT}%{confdir}
 %{__cat} > %{name}.conf << EOT
@@ -574,7 +637,7 @@ for i in ${RPM_BUILD_ROOT}%{confdir}/%{name}.conf \
     ${RPM_BUILD_ROOT}%{_sysconfdir}/sysconfig/%{name} \
     ${RPM_BUILD_ROOT}%{_bindir}/d%{name} \
     ${RPM_BUILD_ROOT}%{_bindir}/%{name} \
-    ${RPM_BUILD_ROOT}%{_sysconfdir}/init.d/%{name} \
+    ${RPM_BUILD_ROOT}%{_initrddir}/%{name} \
     ${RPM_BUILD_ROOT}%{bindir}/relink \
     ${RPM_BUILD_ROOT}%{_sysconfdir}/logrotate.d/%{name}; do
     %{__sed} -i -e 's|\@\@\@TCCONF\@\@\@|%{confdir}|g' \
@@ -585,7 +648,8 @@ for i in ${RPM_BUILD_ROOT}%{confdir}/%{name}.conf \
         -e "s|\@\@\@TCSERVER\@\@\@|%{serverdir}|g" \
         -e "s|\@\@\@TCSHARED\@\@\@|%{shareddir}|g" \
         -e "s|\@\@\@TCAPP\@\@\@|%{appdir}|g" \
-        -e "s|\@\@\@TCLOG\@\@\@|%{logdir}|g" $i
+        -e "s|\@\@\@TCLOG\@\@\@|%{logdir}|g" \
+        -e "s|\@\@\@LIBDIR\@\@\@|%{_libdir}|g" $i
 done
 # Process server/lib
 # Remove local JARs (to be replaced with jpp links in post)
@@ -774,6 +838,11 @@ aot-compile-rpm \
     --exclude var/lib/%{name}/server/lib/servlets-ssi.renametojar
 %endif
 
+%if %{with_ecj}
+%{__install} -d -m 755 ${RPM_BUILD_ROOT}%{_datadir}/eclipse/plugins
+%{__cp} org.apache.jasper_5.5.17.v200706111724.jar ${RPM_BUILD_ROOT}%{_datadir}/eclipse/plugins
+%endif
+
 %clean
 %{__rm} -rf $RPM_BUILD_ROOT
 
@@ -814,27 +883,37 @@ build-jar-repository %{serverdir}/lib catalina-ant5 commons-modeler \
 
 %if %{gcj_support}
 %postun
-%{_bindir}/rebuild-gcj-db
+%{clean_gcjdb}
 %endif
 
 %if %{gcj_support}
 %post common-lib
-%{_bindir}/rebuild-gcj-db
+%{update_gcjdb}
 %endif
 
 %if %{gcj_support}
 %postun common-lib
-%{_bindir}/rebuild-gcj-db
+%{clean_gcjdb}
+%endif
+
+%if %{gcj_support}
+%post jasper-eclipse
+%{update_gcjdb}
+%endif
+
+%if %{gcj_support}
+%postun jasper-eclipse
+%{clean_gcjdb}
 %endif
 
 %if %{gcj_support}
 %post server-lib
-%{_bindir}/rebuild-gcj-db
+%{update_gcjdb}
 %endif
 
 %if %{gcj_support}
 %postun server-lib
-%{_bindir}/rebuild-gcj-db
+%{clean_gcjdb}
 %endif
 
 %post webapps 
@@ -925,8 +1004,8 @@ fi
 # Always clean up workdir and tempdir on upgrade/removal
 %{__rm} -fr %{workdir}/* %{tempdir}/*
 if [ $1 = 0 ]; then
-    [ -f /var/lock/subsys/%{name} ] && %{_sysconfdir}/init.d/%{name} stop
-    [ -f %{_sysconfdir}/init.d/%{name} ] && /sbin/chkconfig --del %{name}
+    [ -f /var/lock/subsys/%{name} ] && %{_initrddir}/%{name} stop
+    [ -f %{_initrddir}/%{name} ] && /sbin/chkconfig --del %{name}
     # Remove automated symlinks
     for repository in %{commondir}/endorsed; do
         find $repository -name '\[*\]*.jar' -not -type d | xargs %{__rm} -f
@@ -996,13 +1075,14 @@ fi
 %attr(770,root,tomcat) %dir %{tempdir}
 %attr(770,root,tomcat) %dir %{workdir}
 %attr(755,tomcat,tomcat) %dir %{logdir}
+%attr(644,tomcat,tomcat) %{logdir}/catalina.out
 %attr(775,root,tomcat) %dir %{confdir}/Catalina
 %attr(775,root,tomcat) %dir %{confdir}/Catalina/localhost
 %attr(755,root,root) %{_bindir}/*
 %attr(755,root,root) %{bindir}/relink
 %attr(644,root,root) %{bindir}/*.jar
 %attr(644,root,root) %{bindir}/*.xml
-%attr(755,root,root) %{_sysconfdir}/init.d/%{name}
+%attr(755,root,root) %{_initrddir}/%{name}
 %attr(644,root,tomcat) %config(noreplace) %{confdir}/catalina.policy
 %attr(644,root,tomcat) %config(noreplace) %{confdir}/catalina.properties
 %attr(660,root,tomcat) %config(noreplace) %{confdir}/logging.properties
@@ -1019,6 +1099,7 @@ fi
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %{commondir}/i18n/*
 %if %{gcj_support}
+%dir %{_libdir}/gcj/%{name}
 %attr(-,root,root) %{_libdir}/gcj/%{name}/bootstrap*
 %attr(-,root,root) %{_libdir}/gcj/%{name}/commons-daemon*
 %attr(-,root,root) %{_libdir}/gcj/%{name}/commons-logging-api*
@@ -1075,7 +1156,7 @@ fi
 %dir %{appdir}/webdav
 %{appdir}/webdav/*
 %if %{gcj_support}
-%ifnarch ppc64 s390x
+%ifnarch ppc64 s390x alpha
 %attr(-,root,root) %{_libdir}/gcj/%{name}/catalina-root*
 %endif
 %endif
@@ -1142,3 +1223,11 @@ fi
 %defattr(-,root,root)
 %doc %{_javadocdir}/%{name}-jsp-%{jspspec}-api-%{version}
 %ghost %doc %{_javadocdir}/%{name}-jsp-%{jspspec}-api
+
+%if %{with_ecj}
+%files jasper-eclipse
+%defattr(-,root,root)
+%dir %{_datadir}/eclipse
+%dir %{_datadir}/eclipse/plugins
+%{_datadir}/eclipse/plugins/org.apache.jasper_*
+%endif
