@@ -146,6 +146,7 @@ BuildRequires: mx4j >= 0:3.0.1
 BuildRequires: regexp >= 0:1.3
 BuildRequires: struts >= 0:1.2.7
 BuildRequires: xerces-j2 >= 0:2.7.1
+BuildRequires: zip
 # xml-commons-apis is needed by Xerces-J2
 BuildRequires: xml-commons-jaxp-1.3-apis >= 1.3
 # FIXME taglibs-standard is not listed in the Tomcat build.properties.default
