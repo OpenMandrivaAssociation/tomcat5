@@ -121,6 +121,7 @@ BuildRequires: java-devel >= 0:1.4.2
 %if %{without_apisonly}
 %if %{with_ecj}
 BuildRequires: ecj >= 0:3.1.1
+BuildRequires: eclipse-jdt
 %endif
 BuildRequires: ant-trax
 BuildRequires: xalan-j2
