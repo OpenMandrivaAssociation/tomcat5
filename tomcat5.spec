@@ -1,4 +1,4 @@
-# Copyright (c) 2000-2007, JPackage Project
+# Copyright (c) 2000-2008, JPackage Project
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,7 @@
 
 %define section free
 
-%define _with_gcj_support 1
-%define gcj_support %{?_with_gcj_support:1}%{!?_with_gcj_support:%{?_without_gcj_support:0}%{!?_without_gcj_support:%{?_gcj_support:%{_gcj_support}}%{!?_gcj_support:0}}}
+%define gcj_support 0
 
 # If you want only apis to be built,
 # give rpmbuild option '--with apisonly'
@@ -46,7 +45,7 @@
 %define full_jname jasper5
 %define jname jasper
 %define majversion 5.5
-%define minversion 25
+%define minversion 26
 %define servletspec 2.4
 %define jspspec 2.0
 
@@ -71,7 +70,7 @@
 Name: tomcat5
 Epoch: 0
 Version: %{majversion}.%{minversion}
-Release: %mkrel 1.2.1
+Release: %mkrel 2.0.1
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -86,6 +85,7 @@ Source5: %{name}-%{majversion}.relink
 Source6: jasper-OSGi-MANIFEST.MF
 Source7: servlet-api-OSGi-MANIFEST.MF
 Source8: jsp-api-OSGi-MANIFEST.MF
+Source9: %{name}-poms-%{version}.tar.gz
 Patch0: %{name}-%{majversion}.link_admin_jar.patch
 Patch1: %{name}-%{majversion}-skip-build-on-install.patch
 Patch2: %{name}-%{majversion}-jt5-build.patch
@@ -106,7 +106,6 @@ Patch18: %{name}-%{majversion}-skip-jsp-precompile.patch
 # Seems to be only needed when building with ECJ for java 1.5 since
 # the default source type for ecj is still 1.4
 Patch19: %{name}-%{majversion}-connectors-util-build.patch
-Patch20: %{name}-%{majversion}-webdav.patch
 Patch21: %{name}-%{majversion}-acceptlangheader.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{epoch}-%{version}-%{release}-root
@@ -246,6 +245,7 @@ Provides: servlet
 Provides: servlet5
 Provides: servlet24
 Provides: servletapi5
+Provides: servlet_2_4_api
 Requires(post): rpm-helper
 requires(postun): rpm-helper
 
@@ -370,6 +370,7 @@ jasper-runtime and ECJ.
 %{__rm} -rf ${RPM_BUILD_DIR}/%{name}-%{version}
 
 %setup -q -c -T -a 0
+gzip -dc %{SOURCE9} |tar xf -
 cd %{packdname}
 %patch0 -b .p0
 %patch1 -b .p1
@@ -389,7 +390,6 @@ cd %{packdname}
 %patch18 -b .p18
 %endif
 %patch19 -b .p19
-%patch20 -b .p20
 %patch21 -b .p21
 
 %if %{without_ecj}
@@ -495,8 +495,8 @@ popd
 %if %{with_ecj}
 mkdir org.apache.jasper
 pushd org.apache.jasper
-unzip -qq ../apache-tomcat-5.5.25-src/build/build/common/lib/jasper-compiler.jar
-unzip -qq ../apache-tomcat-5.5.25-src/build/build/common/lib/jasper-runtime.jar \
+unzip -qq ../apache-tomcat-%{version}-src/build/build/common/lib/jasper-compiler.jar
+unzip -qq ../apache-tomcat-%{version}-src/build/build/common/lib/jasper-runtime.jar \
   -x META-INF/MANIFEST.MF org/apache/jasper/compiler/Localizer.class
 unzip -qq %{_javadir}/jdtcore.jar -x META-INF/MANIFEST.MF
 cp %{SOURCE6} META-INF/MANIFEST.MF
@@ -561,6 +561,7 @@ touch ${RPM_BUILD_ROOT}%{logdir}/catalina.out
 %{__install} -d -m 755 ${RPM_BUILD_ROOT}%{_initrddir}
 %{__install} -d -m 755 ${RPM_BUILD_ROOT}%{_bindir}
 %{__install} -d -m 755 ${RPM_BUILD_ROOT}%{_javadir}/%{name}
+%{__install} -d -m 755 ${RPM_BUILD_ROOT}%{_datadir}/maven2/poms
 %{__install} -m 755 %{SOURCE5} ${RPM_BUILD_ROOT}%{bindir}/relink
 # SysV init and configuration
 %{__install} -d -m 755 ${RPM_BUILD_ROOT}%{_sysconfdir}/sysconfig
@@ -652,6 +653,23 @@ for i in ${RPM_BUILD_ROOT}%{confdir}/%{name}.conf \
         -e "s|\@\@\@TCLOG\@\@\@|%{logdir}|g" \
         -e "s|\@\@\@LIBDIR\@\@\@|%{_libdir}|g" $i
 done
+# Process bin
+# Remove local JARs (to be replaced with jpp links in post)
+pushd ${RPM_BUILD_ROOT}%{bindir}
+    # tomcat-juli will be installed in a public repository
+    %{__mv} tomcat-juli.jar \
+        ${RPM_BUILD_ROOT}%{_javadir}/%{name}/tomcat-juli-%{version}.jar
+    pushd ${RPM_BUILD_ROOT}%{_javadir}/%{name}
+        %{__ln_s} -f tomcat-juli-%{version}.jar tomcat-juli.jar
+    popd
+    %add_to_maven_depmap tomcat tomcat-juli %{version} JPP/%{name} tomcat-juli
+    %{__install} -m 644 \
+        ${RPM_BUILD_DIR}/%{name}-%{version}/tomcat5-poms/tomcat-juli-%{version}.pom \
+        $RPM_BUILD_ROOT/%{_datadir}/maven2/poms/JPP.%{name}-tomcat-juli.pom
+
+    find . -name "*.jar" -not -name "*bootstrap*" \
+           -exec %{__rm} -f {} \;
+popd
 # Process server/lib
 # Remove local JARs (to be replaced with jpp links in post)
 pushd ${RPM_BUILD_ROOT}%{serverdir}/lib
@@ -664,6 +682,11 @@ pushd ${RPM_BUILD_ROOT}%{serverdir}/lib
     pushd ${RPM_BUILD_ROOT}%{_javadir}
         %{__ln_s} -f catalina-ant-%{version}.jar catalina-ant5.jar
     popd
+    %add_to_maven_depmap tomcat catalina-ant %{version} JPP catalina-ant5
+    %{__install} -m 644 \
+        ${RPM_BUILD_DIR}/%{name}-%{version}/tomcat5-poms/catalina-ant-%{version}.pom \
+        $RPM_BUILD_ROOT/%{_datadir}/maven2/poms/JPP-catalina-ant5.pom
+
     # catalina* jars will be installed in a public repository
     for i in catalina*.jar; do
         j="`echo $i | %{__sed} -e 's|\.jar$||'`"
@@ -672,6 +695,10 @@ pushd ${RPM_BUILD_ROOT}%{serverdir}/lib
         pushd ${RPM_BUILD_ROOT}%{_javadir}/%{name}
             %{__ln_s} -f ${j}-%{version}.jar ${j}.jar
         popd
+	%add_to_maven_depmap tomcat ${j} %{version} JPP/tomcat5 ${j}
+        %{__install} -m 644 \
+            ${RPM_BUILD_DIR}/%{name}-%{version}/tomcat5-poms/${j}-%{version}.pom \
+            $RPM_BUILD_ROOT/%{_datadir}/maven2/poms/JPP.tomcat5-${j}.pom
     done
     # servlets* jars will be installed in a public repository
     for i in servlets-*.jar; do
@@ -681,6 +708,10 @@ pushd ${RPM_BUILD_ROOT}%{serverdir}/lib
         pushd ${RPM_BUILD_ROOT}%{_javadir}/%{name}
             %{__ln_s} -f ${j}-%{version}.jar ${j}.jar
         popd
+	%add_to_maven_depmap tomcat ${j} %{version} JPP/tomcat5 ${j}
+        %{__install} -m 644 \
+            ${RPM_BUILD_DIR}/%{name}-%{version}/tomcat5-poms/${j}-%{version}.pom \
+            $RPM_BUILD_ROOT/%{_datadir}/maven2/poms/JPP.tomcat5-${j}.pom
     done
     # tomcat* jars will be installed in a public repository
     for i in tomcat-*.jar; do
@@ -690,6 +721,10 @@ pushd ${RPM_BUILD_ROOT}%{serverdir}/lib
         pushd ${RPM_BUILD_ROOT}%{_javadir}/%{name}
             %{__ln_s} -f ${j}-%{version}.jar ${j}.jar
         popd
+	%add_to_maven_depmap tomcat ${j} %{version} JPP/tomcat5 ${j}
+        %{__install} -m 644 \
+            ${RPM_BUILD_DIR}/%{name}-%{version}/tomcat5-poms/${j}-%{version}.pom \
+            $RPM_BUILD_ROOT/%{_datadir}/maven2/poms/JPP.tomcat5-${j}.pom
     done
 popd
 # Process admin webapp server/webapps/admin
@@ -701,6 +736,10 @@ pushd ${RPM_BUILD_ROOT}%{serverdir}/webapps/admin/WEB-INF/lib
         pushd ${RPM_BUILD_ROOT}%{_javadir}/%{name}
             %{__ln_s} -f ${i}-%{version}.jar ${i}.jar
         popd
+	%add_to_maven_depmap tomcat ${i} %{version} JPP/tomcat5 ${i}
+        %{__install} -m 644 \
+            ${RPM_BUILD_DIR}/%{name}-%{version}/tomcat5-poms/${i}-%{version}.pom \
+            $RPM_BUILD_ROOT/%{_datadir}/maven2/poms/JPP.tomcat5-${i}.pom
     done
 popd
 # Process manager webapp server/webapps/manager
@@ -712,6 +751,10 @@ pushd ${RPM_BUILD_ROOT}%{serverdir}/webapps/manager/WEB-INF/lib
         pushd ${RPM_BUILD_ROOT}%{_javadir}/%{name}
             %{__ln_s} -f ${i}-%{version}.jar ${i}.jar
         popd
+	%add_to_maven_depmap tomcat ${i} %{version} JPP/tomcat5 ${i}
+        %{__install} -m 644 \
+            ${RPM_BUILD_DIR}/%{name}-%{version}/tomcat5-poms/${i}-%{version}.pom \
+            $RPM_BUILD_ROOT/%{_datadir}/maven2/poms/JPP.tomcat5-${i}.pom
     done
 popd
 # Process host-manager webapp server/webapps/host-manager
@@ -724,6 +767,10 @@ pushd ${RPM_BUILD_ROOT}%{serverdir}/webapps/host-manager/WEB-INF/lib
         pushd ${RPM_BUILD_ROOT}%{_javadir}/%{name}
             %{__ln_s} -f ${i}-%{version}.jar ${i}.jar
         popd
+	%add_to_maven_depmap tomcat ${i} %{version} JPP/tomcat5 ${i}
+        %{__install} -m 644 \
+            ${RPM_BUILD_DIR}/%{name}-%{version}/tomcat5-poms/${i}-%{version}.pom \
+            $RPM_BUILD_ROOT/%{_datadir}/maven2/poms/JPP.tomcat5-${i}.pom
     done
 popd
 # Process common/lib
@@ -737,6 +784,10 @@ pushd ${RPM_BUILD_ROOT}%{commondir}/lib
         pushd ${RPM_BUILD_ROOT}%{_javadir}
             %{__ln_s} -f ${j}-%{version}.jar ${j}.jar
         popd
+	%add_to_maven_depmap tomcat ${i} %{version} JPP ${j}
+        %{__install} -m 644 \
+            ${RPM_BUILD_DIR}/%{name}-%{version}/tomcat5-poms/${i}-%{version}.pom \
+            $RPM_BUILD_ROOT/%{_datadir}/maven2/poms/JPP-${j}.pom
     done
     # naming* jars will be installed in a public repository
     for i in naming-*.jar; do
@@ -746,6 +797,10 @@ pushd ${RPM_BUILD_ROOT}%{commondir}/lib
         pushd ${RPM_BUILD_ROOT}%{_javadir}/%{name}
             %{__ln_s} -f ${j}-%{version}.jar ${j}.jar
         popd
+	%add_to_maven_depmap tomcat ${j} %{version} JPP/tomcat5 ${j}
+        %{__install} -m 644 \
+            ${RPM_BUILD_DIR}/%{name}-%{version}/tomcat5-poms/${j}-%{version}.pom \
+            $RPM_BUILD_ROOT/%{_datadir}/maven2/poms/JPP.tomcat5-${j}.pom
     done
 popd
 # Process common/endorsed
@@ -754,6 +809,13 @@ pushd ${RPM_BUILD_ROOT}%{commondir}/endorsed
 popd
 # avoid duplicate servlet.jar
 %{__rm} -f ${RPM_BUILD_ROOT}%{commondir}/lib/servlet.jar
+# Add catalina-deployer
+%{__install} -m 644 %{packdname}/build/deployer/lib/catalina-deployer.jar \
+    ${RPM_BUILD_ROOT}%{_javadir}/%{name}/catalina-deployer-%{version}.jar
+        pushd ${RPM_BUILD_ROOT}%{_javadir}/%{name}
+            %{__ln_s} -f catalina-deployer-%{version}.jar catalina-deployer.jar
+        popd
+
 # Perform FHS translation
 # (final links)
 pushd ${RPM_BUILD_ROOT}%{homedir}
@@ -779,6 +841,12 @@ pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi
         %{__ln_s} -f %{name}-servlet-%{servletspec}-api-%{version}.jar \
             servletapi5.jar
     popd
+    # depmap frag for standard alternative
+    %add_to_maven_depmap javax.servlet servlet-api %{servletspec} JPP servlet_2_4_api
+    %add_to_maven_depmap tomcat servlet-api %{version} JPP %{name}-servlet-%{servletspec}-api
+    %{__install} -m 644 \
+            ${RPM_BUILD_DIR}/%{name}-%{version}/tomcat5-poms/servlet-api-%{version}.pom \
+            $RPM_BUILD_ROOT/%{_datadir}/maven2/poms/JPP-%{name}-servlet-%{servletspec}-api.pom
     # javadoc servlet
     %{__install} -d -m 755 ${RPM_BUILD_ROOT}%{_javadocdir}/%{name}-servlet-%{servletspec}-api-%{version}
     %{__cp} -pr jsr154/build/docs/api/* \
@@ -798,6 +866,11 @@ pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi
         %{__ln_s} -f %{name}-jsp-%{jspspec}-api-%{version}.jar \
             jspapi.jar
     popd
+    %add_to_maven_depmap javax.servlet jsp-api %{jspspec} JPP jsp_2_0_api
+    %add_to_maven_depmap tomcat jsp-api %{version} JPP %{name}-jsp-%{jspspec}-api
+    %{__install} -m 644 \
+            ${RPM_BUILD_DIR}/%{name}-%{version}/tomcat5-poms/jsp-api-%{version}.pom \
+            $RPM_BUILD_ROOT/%{_datadir}/maven2/poms/JPP-%{name}-jsp-%{jspspec}-api.pom
     # javadoc jsp
     %{__install} -d -m 755 ${RPM_BUILD_ROOT}%{_javadocdir}/%{name}-jsp-%{jspspec}-api-%{version}
     %{__cp} -pr jsr152/build/docs/api/* \
@@ -849,9 +922,13 @@ aot-compile-rpm \
 
 %if %{without_apisonly}
 %post
+%update_maven_depmap
 # install tomcat5 (but don't activate)
 /sbin/chkconfig --add %{name}
 # Remove old automated symlinks
+for repository in %{bindir} ; do
+    find $repository -name '*.jar' -type l | xargs %{__rm} -f
+done
 for repository in %{commondir}/endorsed ; do
     find $repository -name '\[*\]*.jar' -not -type d | xargs %{__rm} -f
 done
@@ -863,6 +940,12 @@ for repository in %{serverdir}/lib ; do
 done
 # Create automated links - since all needed extensions may not have been
 # installed for this jvm output is muted
+%{__rm} -f %{bindir}/commons-daemon.jar
+%{__ln_s} $(build-classpath commons-daemon) %{bindir}  2>&1
+%{__rm} -f %{bindir}/commons-logging-api.jar
+%{__ln_s} $(build-classpath commons-logging-api) %{bindir}  2>&1
+%{__rm} -f %{bindir}/tomcat-juli.jar
+%{__ln_s} $(build-classpath tomcat5/tomcat-juli) %{bindir}  2>&1
 build-jar-repository %{commondir}/endorsed jaxp_parser_impl \
     xml-commons-jaxp-1.3-apis 2>&1
 build-jar-repository %{commondir}/lib commons-collections-tomcat5 \
@@ -1099,6 +1182,8 @@ fi
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %{commondir}/i18n/*
+%{_mavendepmapfragdir}
+%{_datadir}/maven2/poms
 %if %{gcj_support}
 %dir %{_libdir}/gcj/%{name}
 %attr(-,root,root) %{_libdir}/gcj/%{name}/bootstrap*
@@ -1112,6 +1197,8 @@ fi
 %defattr(644,root,root,755)
 %dir %{_javadir}/%{name}
 %{_javadir}/%{name}/naming*.jar
+%{_mavendepmapfragdir}
+%{_datadir}/maven2/poms
 %if %{gcj_support}
 %attr(-,root,root) %{_libdir}/gcj/%{name}/naming-*
 %endif
@@ -1122,12 +1209,15 @@ fi
 %dir %{_javadir}/%{name}
 %{_javadir}/%{name}/catalina-ant-jmx*.jar
 %{_javadir}/%{name}/catalina-cluster*.jar
+%{_javadir}/%{name}/catalina-deployer*.jar
 %{_javadir}/%{name}/catalina.jar
 %{_javadir}/%{name}/catalina-%{version}.jar
 %{_javadir}/%{name}/catalina-optional*.jar
 %{_javadir}/%{name}/catalina-storeconfig*.jar
 %{_javadir}/%{name}/servlets*.jar
 %{_javadir}/%{name}/tomcat*.jar
+%{_mavendepmapfragdir}
+%{_datadir}/maven2/poms
 %if %{gcj_support}
 %attr(-,root,root) %{_libdir}/gcj/%{name}/catalina-ant*
 %attr(-,root,root) %{_libdir}/gcj/%{name}/catalina-cluster*
@@ -1187,6 +1277,8 @@ fi
 %{_javadir}/%{jname}5-*.jar
 %attr(755,root,root) %{_bindir}/%{jname}*.sh
 %attr(755,root,root) %{_bindir}/jspc*.sh
+%{_mavendepmapfragdir}
+%{_datadir}/maven2/poms
 %if %{gcj_support}
 %attr(-,root,root) %{_libdir}/gcj/%{name}/%{jname}5-*
 %endif
@@ -1202,6 +1294,8 @@ fi
 %doc %{packdname}/build/LICENSE
 %{_javadir}/%{name}-servlet-%{servletspec}-api*.jar
 %{_javadir}/servletapi5.jar
+%{_mavendepmapfragdir}
+%{_datadir}/maven2/poms
 %if %{gcj_support}
 %attr(-,root,root) %{_libdir}/gcj/%{name}/%{name}-servlet-%{servletspec}-api*
 %endif
@@ -1216,6 +1310,8 @@ fi
 %doc %{packdname}/build/LICENSE
 %{_javadir}/%{name}-jsp-%{jspspec}-api*.jar
 %{_javadir}/jspapi.jar
+%{_mavendepmapfragdir}
+%{_datadir}/maven2/poms
 %if %{gcj_support}
 %attr(-,root,root) %{_libdir}/gcj/%{name}/%{name}-jsp-%{jspspec}-api*
 %endif
