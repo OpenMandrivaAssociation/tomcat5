@@ -70,7 +70,7 @@
 Name: tomcat5
 Epoch: 0
 Version: %{majversion}.%{minversion}
-Release: %mkrel 2.0.2
+Release: %mkrel 2.0.3
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -971,13 +971,15 @@ build-jar-repository %{serverdir}/lib catalina-ant5 commons-modeler \
 %{clean_gcjdb}
 %endif
 
-%if %{gcj_support}
 %post common-lib
+%update_maven_depmap
+%if %{gcj_support}
 %{update_gcjdb}
 %endif
 
-%if %{gcj_support}
 %postun common-lib
+%update_maven_depmap
+%if %{gcj_support}
 %{clean_gcjdb}
 %endif
 
@@ -991,13 +993,15 @@ build-jar-repository %{serverdir}/lib catalina-ant5 commons-modeler \
 %{clean_gcjdb}
 %endif
 
-%if %{gcj_support}
 %post server-lib
+%update_maven_depmap
+%if %{gcj_support}
 %{update_gcjdb}
 %endif
 
-%if %{gcj_support}
 %postun server-lib
+%update_maven_depmap
+%if %{gcj_support}
 %{clean_gcjdb}
 %endif
 
@@ -1039,6 +1043,7 @@ build-jar-repository %{serverdir}/webapps/manager/WEB-INF/lib \
 %endif
 
 %post servlet-%{servletspec}-api
+%update_maven_depmap
 %{_sbindir}/update-alternatives --install %{_javadir}/servlet.jar servlet \
     %{_javadir}/%{name}-servlet-%{servletspec}-api.jar 20400
 %if %{gcj_support}
@@ -1052,6 +1057,7 @@ build-jar-repository %{serverdir}/webapps/manager/WEB-INF/lib \
     %{_javadocdir}/%{name}-servlet-%{servletspec}-api
 
 %postun servlet-%{servletspec}-api
+%update_maven_depmap
 if [ "$1" = "0" ]; then
     %{_sbindir}/update-alternatives --remove servlet \
         %{_javadir}/%{name}-servlet-%{servletspec}-api.jar
@@ -1061,6 +1067,7 @@ fi
 %endif
 
 %post jsp-%{jspspec}-api
+%update_maven_depmap
 %{_sbindir}/update-alternatives --install %{_javadir}/jsp.jar jsp \
     %{_javadir}/%{name}-jsp-%{jspspec}-api.jar 20000
 
@@ -1076,6 +1083,7 @@ fi
     %{_javadocdir}/%{name}-jsp-%{jspspec}-api
 
 %postun jsp-%{jspspec}-api
+%update_maven_depmap
 if [ "$1" = "0" ]; then
     %{_sbindir}/update-alternatives --remove jsp \
         %{_javadir}/%{name}-jsp-%{jspspec}-api.jar
