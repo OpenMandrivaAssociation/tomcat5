@@ -70,7 +70,7 @@
 Name: tomcat5
 Epoch: 0
 Version: %{majversion}.%{minversion}
-Release: %mkrel 2.0.4
+Release: %mkrel 2.0.5
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -1046,6 +1046,8 @@ build-jar-repository %{serverdir}/webapps/manager/WEB-INF/lib \
 %update_maven_depmap
 %{_sbindir}/update-alternatives --install %{_javadir}/servlet.jar servlet \
     %{_javadir}/%{name}-servlet-%{servletspec}-api.jar 20400
+%{_sbindir}/update-alternatives --install %{_javadir}/servlet_2_4_api.jar servlet_2_4_api \
+    %{_javadir}/%{name}-servlet-%{servletspec}-api.jar 20400
 %if %{gcj_support}
 %{update_gcjdb}
 %endif
@@ -1061,6 +1063,8 @@ build-jar-repository %{serverdir}/webapps/manager/WEB-INF/lib \
 if [ "$1" = "0" ]; then
     %{_sbindir}/update-alternatives --remove servlet \
         %{_javadir}/%{name}-servlet-%{servletspec}-api.jar
+    %{_sbindir}/update-alternatives --remove servlet_2_4_api \
+            %{_javadir}/%{name}-servlet-%{servletspec}-api.jar
 fi
 %if %{gcj_support}
 %{clean_gcjdb}
@@ -1070,7 +1074,8 @@ fi
 %update_maven_depmap
 %{_sbindir}/update-alternatives --install %{_javadir}/jsp.jar jsp \
     %{_javadir}/%{name}-jsp-%{jspspec}-api.jar 20000
-
+%{_sbindir}/update-alternatives --install %{_javadir}/jsp_2_0_api.jar jsp_2_0_api \
+    %{_javadir}/%{name}-jsp-%{jspspec}-api.jar 20000
 %if %{gcj_support}
 %{update_gcjdb}
 %endif
@@ -1086,6 +1091,8 @@ fi
 %update_maven_depmap
 if [ "$1" = "0" ]; then
     %{_sbindir}/update-alternatives --remove jsp \
+        %{_javadir}/%{name}-jsp-%{jspspec}-api.jar
+    %{_sbindir}/update-alternatives --remove jsp_2_0_api \
         %{_javadir}/%{name}-jsp-%{jspspec}-api.jar
 fi
 %if %{gcj_support}
