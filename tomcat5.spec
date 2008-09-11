@@ -70,7 +70,7 @@
 Name: tomcat5
 Epoch: 0
 Version: %{majversion}.%{minversion}
-Release: %mkrel 2.5.5
+Release: %mkrel 2.5.6
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -107,6 +107,12 @@ Patch18: %{name}-%{majversion}-skip-jsp-precompile.patch
 # the default source type for ecj is still 1.4
 Patch19: %{name}-%{majversion}-connectors-util-build.patch
 Patch21: %{name}-%{majversion}-acceptlangheader.patch
+
+Patch100: tomcat5-5.5.23-CVE-2008-1232.patch
+Patch101: tomcat5-5.5.23-CVE-2008-1947.patch
+Patch102: tomcat5-5.5.23-CVE-2008-2370.patch
+Patch103: tomcat5-5.5.23-CVE-2008-2938.patch
+
 
 BuildRoot: %{_tmppath}/%{name}-%{epoch}-%{version}-%{release}-root
 %if ! %{gcj_support}
@@ -393,6 +399,12 @@ cd %{packdname}
 %patch19 -b .p19
 %patch21 -b .p21
 
+# security fix
+%patch100
+%patch101
+%patch102
+%patch103
+
 %if %{without_ecj}
     %{__rm} %{jname}/src/share/org/apache/jasper/compiler/JDTCompiler.java
 %endif
@@ -405,7 +417,7 @@ done
 # copy license for later doc files declaration
 pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}
     %{__cp} build/LICENSE .
-popd 
+popd
 # build jspapi and servletapi as ant dist will require them later
 pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi
     pushd jsr154
@@ -903,7 +915,7 @@ popd
 %endif
 
 %if %{gcj_support}
-# Remove non-standard jars from the list for aot compilation 
+# Remove non-standard jars from the list for aot compilation
 aot-compile-rpm \
     --exclude var/lib/%{name}/webapps/tomcat-docs/appdev/sample/sample.war \
     --exclude var/lib/%{name}/webapps/servlets-examples/WEB-INF/classes \
@@ -1005,7 +1017,7 @@ build-jar-repository %{serverdir}/lib catalina-ant5 commons-modeler \
 %{clean_gcjdb}
 %endif
 
-%post webapps 
+%post webapps
 # Create automated links - since all needed extensions may not have been
 # installed for this jvm output is muted
 build-jar-repository %{appdir}/jsp-examples/WEB-INF/lib \
