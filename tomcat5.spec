@@ -74,7 +74,7 @@ Version: %{majversion}.%{minversion}
 Release: %mkrel 0.1.0
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
-Group: Networking/Daemons
+Group: Development/Java
 License: ASL 2.0
 URL: http://tomcat.apache.org
 Source0: http://www.apache.org/dist/tomcat/tomcat-5/v%{version}/src/%{packdname}.tar.gz
@@ -204,7 +204,7 @@ learn more about getting involved, click here.
 
 %if %{without_apisonly}
 %package webapps
-Group: System Environment/Applications
+Group: Development/Java
 # Replace PreReq
 Requires(pre): %{name} = %{epoch}:%{version}-%{release}
 Requires(postun): %{name} = %{epoch}:%{version}-%{release}
@@ -218,7 +218,7 @@ Requires(preun): /bin/rm
 Web applications for Apache Tomcat
 
 %package admin-webapps
-Group: System Environment/Applications
+Group: Development/Java
 Summary: Administrative web applications for Apache Tomcat
 Requires(pre): %{name} = %{epoch}:%{version}-%{release}
 Requires(postun): %{name} = %{epoch}:%{version}-%{release}
@@ -241,7 +241,7 @@ The administrative web applications (admin and manager) for Apache Tomcat.
 %endif
 
 %package servlet-%{servletspec}-api
-Group: Internet/WWW/Dynamic Content
+Group: Development/Java
 Requires: %{_sbindir}/update-alternatives
 Summary: Apache Tomcat Servlet implementation classes
 Obsoletes: servletapi5
@@ -256,7 +256,7 @@ Contains the implementation classes
 of the Apache Tomcat Servlet API (packages javax.servlet).
 
 %package servlet-%{servletspec}-api-javadoc
-Group: Development/Documentation
+Group: Development/Java
 Summary: Javadoc generated documentation for %{name}-servlet-%{servletspec}-api
 Obsoletes: servletapi5-javadoc
 Provides: servletapi5-javadoc
@@ -268,7 +268,7 @@ Contains the javadoc generated documentation for the implementation classes
 of the Apache Tomcat Servlet and JSP APIs (packages javax.servlet).
 
 %package jsp-%{jspspec}-api
-Group: Internet/WWW/Dynamic Content
+Group: Development/Java
 Requires: %{_sbindir}/update-alternatives
 Requires: %{name}-servlet-%{servletspec}-api = %{epoch}:%{version}-%{release}
 # We need this to indirectly get rid of legacy jsp included in old
@@ -285,7 +285,7 @@ Contains the implementation classes
 of the Apache Tomcat JSP API (packages javax.servlet.jsp).
 
 %package jsp-%{jspspec}-api-javadoc
-Group: Development/Documentation
+Group: Development/Java
 Summary: Javadoc generated documentation for %{name}-jsp-%{jspspec}-api
 Requires(post): /bin/rm
 Requires(post): /bin/ln
@@ -296,7 +296,7 @@ of the Apache Tomcat JSP API (packages javax.servlet.jsp).
 
 %if %{without_apisonly}
 %package common-lib
-Group: Development/Compilers
+Group: Development/Java
 Summary: Libraries needed to run the Tomcat Web container (part)
 Requires: java >= 0:1.5.0
 Requires(post): jpackage-utils >= 0:1.7.4
@@ -329,7 +329,7 @@ Requires(preun): /bin/rm
 Libraries needed to run the Tomcat Web container (part)
 
 %package server-lib
-Group: Development/Compilers
+Group: Development/Java
 Summary: Libraries needed to run the Tomcat Web container (part)
 Requires(post): jpackage-utils >= 0:1.7.4
 Requires: jakarta-commons-modeler >= 0:2.0
@@ -346,7 +346,7 @@ Requires(preun): /bin/rm
 Libraries needed to run the Tomcat Web container (part)
 
 %package %{jname}
-Group: Development/Compilers
+Group: Development/Java
 Requires: %{name}-servlet-%{servletspec}-api = %{epoch}:%{version}-%{release}
 Summary: Compiler JARs and associated scripts for %{name}
 Obsoletes: jasper5
@@ -356,7 +356,7 @@ Provides: jasper5
 Compiler JARs and associated scripts for %{name}
 
 %package %{jname}-javadoc
-Group: Development/Documentation
+Group: Development/Java
 Summary: Javadoc generated documentation for %{name}-%{jname}
 Obsoletes: jasper5-javadoc
 Provides: jasper5-javadoc
@@ -367,7 +367,7 @@ Javadoc for generated documentation %{name}-%{jname}
 
 %if %{with_ecj}
 %package jasper-eclipse
-Group: Text Editors/Integrated Development Environments (IDE)
+Group: Development/Java
 Summary: Jasper OSGi Eclipse plugin
 
 %description jasper-eclipse
