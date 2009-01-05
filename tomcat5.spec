@@ -151,8 +151,8 @@ BuildRequires: java-gcj-compat-devel
 Requires(post): jpackage-utils >= 0:1.7.4
 Requires(post): /bin/rm
 Requires(preun): /bin/rm
-Requires(post): /sbin/chkconfig
-Requires(preun): /sbin/chkconfig
+Requires(post): rpm-helper
+Requires(preun): rpm-helper
 Requires:       /lib/lsb/init-functions
 Requires(preun): /lib/lsb/init-functions
 Requires(post): findutils
@@ -422,12 +422,12 @@ popd
 # build jspapi and servletapi as ant dist will require them later
 pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi
     pushd jsr154
-        ant -Dservletapi.build="build" \
+        %ant -Dservletapi.build="build" \
             -Dservletapi.dist="dist" \
             -Dbuild.compiler="modern" dist
     popd
     pushd jsr152
-        ant -Dservletapi.build="build" \
+        %ant -Dservletapi.build="build" \
             -Dservletapi.dist="dist" \
             -Dbuild.compiler="modern" dist
     popd
@@ -450,7 +450,7 @@ commons-daemon.jar=$(build-classpath commons-daemon)
 junit.jar=$(build-classpath junit)
 jasper-compiler-jdt.jar=$(build-classpath ecj)
 EOBP
-    ant -Djava.home="%{java_home}" -Dbuild.compiler="modern" javadoc
+    %ant -Djava.home="%{java_home}" -Dbuild.compiler="modern" javadoc
 popd
 
 # build tomcat 5
@@ -500,10 +500,10 @@ jsse.jar=$(build-classpath jsse/jsse)
 servletapi.build.notrequired=true
 jspapi.build.notrequired=true
 EOBP
-ant -Dbuild.compiler="modern" -Djava.home="%{java_home}" init
+%ant -Dbuild.compiler="modern" -Djava.home="%{java_home}" init
 cp ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr154/dist/lib/servlet-api.jar \
         ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/build/build/common/lib/servlet-api.jar
-    ant -Dbuild.compiler="modern" -Djava.home="%{java_home}" build
+    %ant -Dbuild.compiler="modern" -Djava.home="%{java_home}" build
 popd
 # build the connectors
 pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/connectors
@@ -536,7 +536,7 @@ jnet.jar=$(build-classpath jsse/jnet)
 jsse.jar=$(build-classpath jsse/jsse)
 tomcat5.home=../../build/build
 EOBP
-    ant -Dbuild.compiler="modern" -Djava.home="%{java_home}" build
+    %ant -Dbuild.compiler="modern" -Djava.home="%{java_home}" build
 popd
 %endif
 
@@ -621,7 +621,7 @@ EOT
 pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/build
     export usejikes="false"
     export OPT_JAR_LIST="ant/ant-trax xalan-j2-serializer"
-    ant -Dbuild.compiler="modern" -Djava.home=%{java_home} dist
+    %ant -Dbuild.compiler="modern" -Djava.home=%{java_home} dist
     pushd dist
         %{__mv} bin/* ${RPM_BUILD_ROOT}%{bindir}
         %{__mv} common/* ${RPM_BUILD_ROOT}%{commondir}
