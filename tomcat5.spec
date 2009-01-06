@@ -71,7 +71,7 @@
 Name: tomcat5
 Epoch: 0
 Version: %{majversion}.%{minversion}
-Release: %mkrel 0.1.0
+Release: %mkrel 0.2.0
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -151,12 +151,8 @@ Requires(post): xml-commons-jaxp-1.3-apis
 BuildRequires: java-gcj-compat-devel
 %endif
 Requires(post): jpackage-utils >= 0:1.7.4
-Requires(post): /bin/rm
-Requires(preun): /bin/rm
 Requires(post): rpm-helper
 Requires(preun): rpm-helper
-Requires:       /lib/lsb/init-functions
-Requires(preun): /lib/lsb/init-functions
 Requires(post): findutils
 Requires(preun): findutils
 Requires(pre): %{_sbindir}/useradd
@@ -214,7 +210,6 @@ Requires: jakarta-taglibs-standard >= 0:1.1.0
 Summary: Web applications for Apache Tomcat
 Requires(post): jpackage-utils >= 0:1.7.4
 Requires(preun): findutils
-Requires(preun): /bin/rm
 
 %description webapps
 Web applications for Apache Tomcat
@@ -225,8 +220,6 @@ Summary: Administrative web applications for Apache Tomcat
 Requires(pre): %{name} = %{epoch}:%{version}-%{release}
 Requires(postun): %{name} = %{epoch}:%{version}-%{release}
 Requires: struts >= 0:1.3.8
-Requires: struts-taglib >= 0:1.3.8
-Requires(post): /bin/rm
 Requires(post): jpackage-utils >= 0:1.7.4
 Requires(post): findutils
 Requires(post): jakarta-commons-beanutils
@@ -234,9 +227,7 @@ Requires(post): jakarta-commons-collections
 Requires(post): jakarta-commons-digester
 Requires(post): jakarta-commons-io
 Requires(post): struts
-Requires(post): struts-taglib
 Requires(preun): findutils
-Requires(preun): /bin/rm
 
 %description admin-webapps
 The administrative web applications (admin and manager) for Apache Tomcat.
@@ -262,8 +253,6 @@ Group: Development/Java
 Summary: Javadoc generated documentation for %{name}-servlet-%{servletspec}-api
 Obsoletes: servletapi5-javadoc
 Provides: servletapi5-javadoc
-Requires(post): /bin/rm
-Requires(post): /bin/ln
 
 %description servlet-%{servletspec}-api-javadoc
 Contains the javadoc generated documentation for the implementation classes
