@@ -71,7 +71,7 @@
 Name: tomcat5
 Epoch: 0
 Version: %{majversion}.%{minversion}
-Release: %mkrel 0.2.0
+Release: %mkrel 0.3.0
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -219,7 +219,7 @@ Group: Development/Java
 Summary: Administrative web applications for Apache Tomcat
 Requires(pre): %{name} = %{epoch}:%{version}-%{release}
 Requires(postun): %{name} = %{epoch}:%{version}-%{release}
-Requires: struts >= 0:1.3.8
+Requires: struts
 Requires(post): jpackage-utils >= 0:1.7.4
 Requires(post): findutils
 Requires(post): jakarta-commons-beanutils
