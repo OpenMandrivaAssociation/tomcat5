@@ -71,7 +71,7 @@
 Name: tomcat5
 Epoch: 0
 Version: %{majversion}.%{minversion}
-Release: %mkrel 0.3.0
+Release: %mkrel 0.4.0
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
