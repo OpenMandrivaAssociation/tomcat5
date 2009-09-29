@@ -71,7 +71,7 @@
 Name: tomcat5
 Epoch: 0
 Version: %{majversion}.%{minversion}
-Release: %mkrel 0.4.0
+Release: %mkrel 0.5.0
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -108,6 +108,12 @@ Patch18: %{name}-%{majversion}-skip-jsp-precompile.patch
 # Seems to be only needed when building with ECJ for java 1.5 since
 # the default source type for ecj is still 1.4
 Patch19: %{name}-%{majversion}-connectors-util-build.patch
+
+Patch100: tomcat5-5.5.27-CVE-2008-5515.diff
+Patch101: tomcat5-5.5.27-CVE-2009-0033.diff
+Patch102: tomcat5-5.5.27-CVE-2009-0580.diff
+Patch103: tomcat5-5.5.27-CVE-2009-0781.diff
+Patch104: tomcat5-5.5.27-CVE-2009-0783.diff
 
 BuildRoot: %{_tmppath}/%{name}-%{epoch}-%{version}-%{release}-root
 %if ! %{gcj_support}
@@ -371,7 +377,7 @@ jasper-runtime and ECJ.
 
 %setup -q -c -T -a 0
 %setup -q -D -T -a 6
-cd %{packdname}
+pushd %{packdname}
 %patch0 -p0
 %patch1 -p0
 %patch2 -p0
@@ -394,12 +400,22 @@ cd %{packdname}
 %if %{with_ecj}
 %patch19 -p0
 %endif
+popd
 
+# security fixes
+%patch100 -p1 -b .CVE-2008-5515
+%patch101 -p1 -b .CVE-2009-0033
+%patch102 -p1 -b .CVE-2009-0580
+%patch103 -p1 -b .CVE-2009-0781
+%patch104 -p1 -b .CVE-2009-0783
+
+pushd %{packdname}
 %if %{without_ecj}
     %{__rm} %{jname}/src/share/org/apache/jasper/compiler/JDTCompiler.java
 %endif
 
 find -type f -name '*.jsp' | xargs -t perl -pi -e 's/<html:html locale="true">/<html:html>/g'
+popd
 
 %build
 # remove pre-built binaries
@@ -1341,3 +1357,5 @@ fi
 %dir %{_datadir}/eclipse/plugins
 %{_datadir}/eclipse/plugins/org.apache.jasper_*
 %endif
+
+
