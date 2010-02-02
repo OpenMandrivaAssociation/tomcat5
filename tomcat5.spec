@@ -45,7 +45,7 @@
 %define full_jname jasper5
 %define jname jasper
 %define majversion 5.5
-%define minversion 27
+%define minversion 28
 %define servletspec 2.4
 %define jspspec 2.0
 
@@ -78,6 +78,7 @@ Group: Development/Java
 License: ASL 2.0
 URL: http://tomcat.apache.org
 Source0: http://www.apache.org/dist/tomcat/tomcat-5/v%{version}/src/%{packdname}.tar.gz
+Source10: http://www.apache.org/dist/tomcat/tomcat-5/v%{version}/src/%{packdname}.tar.gz.asc
 Source1: %{name}-%{majversion}.init
 Source2: %{name}-%{majversion}.conf
 Source3: %{name}-%{majversion}.wrapper
@@ -108,12 +109,6 @@ Patch18: %{name}-%{majversion}-skip-jsp-precompile.patch
 # Seems to be only needed when building with ECJ for java 1.5 since
 # the default source type for ecj is still 1.4
 Patch19: %{name}-%{majversion}-connectors-util-build.patch
-
-Patch100: tomcat5-5.5.27-CVE-2008-5515.diff
-Patch101: tomcat5-5.5.27-CVE-2009-0033.diff
-Patch102: tomcat5-5.5.27-CVE-2009-0580.diff
-Patch103: tomcat5-5.5.27-CVE-2009-0781.diff
-Patch104: tomcat5-5.5.27-CVE-2009-0783.diff
 
 BuildRoot: %{_tmppath}/%{name}-%{epoch}-%{version}-%{release}-root
 %if ! %{gcj_support}
@@ -403,11 +398,6 @@ pushd %{packdname}
 popd
 
 # security fixes
-%patch100 -p1 -b .CVE-2008-5515
-%patch101 -p1 -b .CVE-2009-0033
-%patch102 -p1 -b .CVE-2009-0580
-%patch103 -p1 -b .CVE-2009-0781
-%patch104 -p1 -b .CVE-2009-0783
 
 pushd %{packdname}
 %if %{without_ecj}
