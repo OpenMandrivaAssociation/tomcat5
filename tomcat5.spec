@@ -71,7 +71,7 @@
 Name: tomcat5
 Epoch: 0
 Version: %{majversion}.%{minversion}
-Release: %mkrel 0.5.0
+Release: %mkrel 0.5.1
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -109,7 +109,10 @@ Patch18: %{name}-%{majversion}-skip-jsp-precompile.patch
 # Seems to be only needed when building with ECJ for java 1.5 since
 # the default source type for ecj is still 1.4
 Patch19: %{name}-%{majversion}-connectors-util-build.patch
-
+#security fixes
+Patch100: tomcat5-5.5.28-CVE-2009-2693-2901-2902.diff
+Patch101: tomcat5-5.5.28-CVE-2010-2227.diff
+Patch102: tomcat5-5.5.28-CVE-2010-1157.diff
 BuildRoot: %{_tmppath}/%{name}-%{epoch}-%{version}-%{release}-root
 %if ! %{gcj_support}
 BuildArch: noarch
@@ -398,6 +401,9 @@ pushd %{packdname}
 popd
 
 # security fixes
+%patch100 -p1 -b .CVE-2009-2693-2901-2902
+%patch101 -p1 -b .CVE-2010-2227
+%patch102 -p1 -b .CVE-2010-1157
 
 pushd %{packdname}
 %if %{without_ecj}
