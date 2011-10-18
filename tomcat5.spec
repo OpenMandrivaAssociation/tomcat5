@@ -71,7 +71,7 @@
 Name: tomcat5
 Epoch: 0
 Version: %{majversion}.%{minversion}
-Release: %mkrel 0.5.2
+Release: %mkrel 0.5.3
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -109,10 +109,16 @@ Patch18: %{name}-%{majversion}-skip-jsp-precompile.patch
 # Seems to be only needed when building with ECJ for java 1.5 since
 # the default source type for ecj is still 1.4
 Patch19: %{name}-%{majversion}-connectors-util-build.patch
-#security fixes
+# security fixes
 Patch100: tomcat5-5.5.28-CVE-2009-2693-2901-2902.diff
 Patch101: tomcat5-5.5.28-CVE-2010-2227.diff
 Patch102: tomcat5-5.5.28-CVE-2010-1157.diff
+Patch103: tomcat5-5.5.27-CVE-2010-3718.diff
+Patch104: tomcat5-5.5.28-CVE-2011-0013.diff
+Patch105: tomcat5-5.5.28-CVE-2011-2204.diff
+Patch106: tomcat5-5.5.28-CVE-2011-2526.diff
+Patch107: tomcat5-5.5.28-CVE-2011-1184.diff
+Patch108: tomcat-5.5.28-CVE-2011-3190.diff
 BuildRoot: %{_tmppath}/%{name}-%{epoch}-%{version}-%{release}-root
 %if ! %{gcj_support}
 BuildArch: noarch
@@ -404,6 +410,12 @@ popd
 %patch100 -p1 -b .CVE-2009-2693-2901-2902
 %patch101 -p1 -b .CVE-2010-2227
 %patch102 -p1 -b .CVE-2010-1157
+%patch103 -p0 -b .CVE-2010-3718
+%patch104 -p1 -b .CVE-2011-0013
+%patch105 -p1 -b .CVE-2011-2204
+%patch106 -p1 -b .CVE-2011-2526
+%patch107 -p1 -b .CVE-2011-1184
+%patch108 -p0 -b .CVE-2011-3190
 
 pushd %{packdname}
 %if %{without_ecj}
@@ -1353,5 +1365,3 @@ fi
 %dir %{_datadir}/eclipse/plugins
 %{_datadir}/eclipse/plugins/org.apache.jasper_*
 %endif
-
-
