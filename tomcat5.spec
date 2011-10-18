@@ -28,10 +28,6 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-%define section free
-
-%define gcj_support %{?_with_gcj_support:1}%{!?_with_gcj_support:%{?_without_gcj_support:0}%{!?_without_gcj_support:%{?_gcj_support:%{_gcj_support}}%{!?_gcj_support:0}}}
-
 # If you want only apis to be built,
 # give rpmbuild option '--with apisonly'
 %define with_apisonly %{?_with_apisonly:1}%{!?_with_apisonly:0}
@@ -45,7 +41,7 @@
 %define full_jname jasper5
 %define jname jasper
 %define majversion 5.5
-%define minversion 28
+%define minversion 34
 %define servletspec 2.4
 %define jspspec 2.0
 
@@ -71,20 +67,20 @@
 Name: tomcat5
 Epoch: 0
 Version: %{majversion}.%{minversion}
-Release: %mkrel 0.5.3
+Release: 1
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
 License: ASL 2.0
 URL: http://tomcat.apache.org
 Source0: http://www.apache.org/dist/tomcat/tomcat-5/v%{version}/src/%{packdname}.tar.gz
-Source10: http://www.apache.org/dist/tomcat/tomcat-5/v%{version}/src/%{packdname}.tar.gz.asc
 Source1: %{name}-%{majversion}.init
 Source2: %{name}-%{majversion}.conf
 Source3: %{name}-%{majversion}.wrapper
 Source4: %{name}-%{majversion}.logrotate
 Source5: %{name}-%{majversion}.relink
 Source6: %{name}-poms-%{version}.tar.bz2
+#Source6: %{name}-poms-%{version}.tar.bz2
 Source7: jasper-OSGi-MANIFEST.MF
 Source8: servlet-api-OSGi-MANIFEST.MF
 Source9: jsp-api-OSGi-MANIFEST.MF
@@ -109,29 +105,20 @@ Patch18: %{name}-%{majversion}-skip-jsp-precompile.patch
 # Seems to be only needed when building with ECJ for java 1.5 since
 # the default source type for ecj is still 1.4
 Patch19: %{name}-%{majversion}-connectors-util-build.patch
-# security fixes
-Patch100: tomcat5-5.5.28-CVE-2009-2693-2901-2902.diff
-Patch101: tomcat5-5.5.28-CVE-2010-2227.diff
-Patch102: tomcat5-5.5.28-CVE-2010-1157.diff
-Patch103: tomcat5-5.5.27-CVE-2010-3718.diff
-Patch104: tomcat5-5.5.28-CVE-2011-0013.diff
-Patch105: tomcat5-5.5.28-CVE-2011-2204.diff
-Patch106: tomcat5-5.5.28-CVE-2011-2526.diff
-Patch107: tomcat5-5.5.28-CVE-2011-1184.diff
-Patch108: tomcat-5.5.28-CVE-2011-3190.diff
-BuildRoot: %{_tmppath}/%{name}-%{epoch}-%{version}-%{release}-root
-%if ! %{gcj_support}
-BuildArch: noarch
-%endif
+Patch20: %{name}-%{majversion}-nonative.patch
 
-Buildrequires: jpackage-utils >= 0:1.7.4
-BuildRequires: java-devel >= 0:1.5.0
+BuildRoot: %{_tmppath}/%{name}-%{epoch}-%{version}-%{release}-root
+BuildArch: noarch
+
+BuildRequires: jpackage-utils >= 0:1.7.4
+BuildRequires: java-rpmbuild
+BuildRequires: java-1.6.0-devel
 BuildRequires: ant >= 0:1.6.5
 %if %{without_apisonly}
 %if %{with_ecj}
 BuildRequires: ecj >= 0:3.3.1.1
 %endif
-BuildRequires: ant-trax
+BuildRequires: ant-nodeps
 BuildRequires: xalan-j2
 BuildRequires: jakarta-commons-beanutils >= 0:1.7
 BuildRequires: jakarta-commons-collections >= 0:3.1
@@ -147,35 +134,37 @@ BuildRequires: jakarta-commons-launcher >= 0:0.9
 BuildRequires: jakarta-commons-el >= 0:1.0
 BuildRequires: junit >= 0:3.8.1
 BuildRequires: regexp >= 0:1.3
+BuildRequires: struts >= 0:1.2.9
+#BuildRequires: struts-taglib >= 0:1.3.8
 BuildRequires: xerces-j2 >= 0:2.7.1
 BuildRequires: zip
-BuildRequires: java-rpmbuild
-BuildRequires: struts
 # xml-commons-apis is needed by Xerces-J2
 BuildRequires: xml-commons-jaxp-1.3-apis
 # FIXME taglibs-standard is not listed in the Tomcat build.properties.default
 BuildRequires: jakarta-taglibs-standard >= 0:1.1.0
+# formerly non-free stuff
+# jta can be provided by geronimo-jta-version-api
+BuildRequires: jta
+# javamail can be provided by classpathx-mail
+BuildRequires: javamail
+BuildRequires: mx4j
 Requires(post): xml-commons-jaxp-1.3-apis
 # libgcj aot-compiled native libraries
-%if %{gcj_support}
-BuildRequires: java-gcj-compat-devel
-%endif
 Requires(post): jpackage-utils >= 0:1.7.4
-Requires(post): rpm-helper
-Requires(preun): rpm-helper
+Requires(post): coreutils
+Requires(preun): coreutils
+Requires(post): chkconfig
+Requires(preun): chkconfig
 Requires(post): findutils
 Requires(preun): findutils
-Requires(pre): %{_sbindir}/useradd
-Requires(pre): %{_sbindir}/groupadd
-Requires(post): jakarta-commons-dbcp-tomcat5 >= 0:1.2.1
-Requires(post): jakarta-commons-collections-tomcat5 >= 0:3.1
-Requires(post): jakarta-commons-pool-tomcat5 >= 0:1.2
-Requires: jaf = 0:1.0.2
-Requires(post): jaf = 0:1.0.2
+Requires(pre): shadow-utils
+Requires(post): jakarta-commons-dbcp >= 0:1.2.1
+Requires(post): jakarta-commons-collections >= 0:3.1
+Requires(post): jakarta-commons-pool >= 0:1.2
 Requires: jakarta-commons-logging >= 0:1.0.4
 Requires(post): jakarta-commons-logging >= 0:1.0.4
-Requires: javamail = 0:1.3.1
-Requires(post): javamail = 0:1.3.1
+Requires: javamail 
+Requires(post): javamail 
 %if %{with_ecj}
 Requires: ecj >= 0:3.3.1.1
 Requires(post): ecj >= 0:3.3.1.1
@@ -190,7 +179,7 @@ Requires: jakarta-commons-daemon >= 0:1.0.1
 Requires(post): jakarta-commons-daemon >= 0:1.0.1
 Requires: jakarta-commons-launcher >= 0:0.9
 # alternatives
-Requires: java-devel >= 0:1.5.0
+Requires: java-1.6.0-devel
 # And it needs its own API subpackages for running
 Requires: %{name}-common-lib = %{epoch}:%{version}-%{release}
 Requires: %{name}-server-lib = %{epoch}:%{version}-%{release}
@@ -220,6 +209,7 @@ Requires: jakarta-taglibs-standard >= 0:1.1.0
 Summary: Web applications for Apache Tomcat
 Requires(post): jpackage-utils >= 0:1.7.4
 Requires(preun): findutils
+Requires(preun): coreutils
 
 %description webapps
 Web applications for Apache Tomcat
@@ -229,7 +219,9 @@ Group: Development/Java
 Summary: Administrative web applications for Apache Tomcat
 Requires(pre): %{name} = %{epoch}:%{version}-%{release}
 Requires(postun): %{name} = %{epoch}:%{version}-%{release}
-Requires: struts
+Requires: struts >= 0:1.2.9
+#Requires: struts-taglib >= 0:1.3.8
+Requires(post): /bin/rm
 Requires(post): jpackage-utils >= 0:1.7.4
 Requires(post): findutils
 Requires(post): jakarta-commons-beanutils
@@ -237,7 +229,9 @@ Requires(post): jakarta-commons-collections
 Requires(post): jakarta-commons-digester
 Requires(post): jakarta-commons-io
 Requires(post): struts
+#Requires(post): struts-taglib
 Requires(preun): findutils
+Requires(preun): coreutils
 
 %description admin-webapps
 The administrative web applications (admin and manager) for Apache Tomcat.
@@ -263,6 +257,7 @@ Group: Development/Java
 Summary: Javadoc generated documentation for %{name}-servlet-%{servletspec}-api
 Obsoletes: servletapi5-javadoc
 Provides: servletapi5-javadoc
+Requires(post): coreutils
 
 %description servlet-%{servletspec}-api-javadoc
 Contains the javadoc generated documentation for the implementation classes
@@ -288,8 +283,7 @@ of the Apache Tomcat JSP API (packages javax.servlet.jsp).
 %package jsp-%{jspspec}-api-javadoc
 Group: Development/Java
 Summary: Javadoc generated documentation for %{name}-jsp-%{jspspec}-api
-Requires(post): /bin/rm
-Requires(post): /bin/ln
+Requires(post): coreutils
 
 %description jsp-%{jspspec}-api-javadoc
 Contains the javadoc generated documentation for the implementation classes
@@ -299,17 +293,17 @@ of the Apache Tomcat JSP API (packages javax.servlet.jsp).
 %package common-lib
 Group: Development/Java
 Summary: Libraries needed to run the Tomcat Web container (part)
-Requires: java >= 0:1.5.0
+Requires: java-1.6.0
 Requires(post): jpackage-utils >= 0:1.7.4
-Requires: jakarta-commons-collections-tomcat5 >= 0:3.1
-Requires(post): jakarta-commons-collections-tomcat5 >= 0:3.1
-Requires: jakarta-commons-dbcp-tomcat5 >= 0:1.2.1
-Requires(post): jakarta-commons-dbcp-tomcat5 >= 0:1.2.1
+Requires: jakarta-commons-collections >= 0:3.1
+Requires(post): jakarta-commons-collections >= 0:3.1
+Requires: jakarta-commons-dbcp >= 0:1.2.1
+Requires(post): jakarta-commons-dbcp >= 0:1.2.1
 Requires: jakarta-commons-el >= 0:1.0
 Requires(post): jakarta-commons-el >= 0:1.0
 # FIXME commons-pool is not listed in the Tomcat build.properties.default
-Requires: jakarta-commons-pool-tomcat5 >= 0:1.2
-Requires(post): jakarta-commons-pool-tomcat5 >= 0:1.2
+Requires: jakarta-commons-pool >= 0:1.2
+Requires(post): jakarta-commons-pool >= 0:1.2
 %if %{with_ecj}
 Requires: ecj >= 0:3.3.1.1
 Requires(post): ecj >= 0:3.3.1.1
@@ -323,8 +317,8 @@ Requires: %{name}-jsp-%{jspspec}-api = %{epoch}:%{version}-%{release}
 Requires: %{name}-%{jname} = %{epoch}:%{version}-%{release}
 Requires(post): findutils
 Requires(preun): findutils
-Requires(post): /bin/rm
-Requires(preun): /bin/rm
+Requires(post): coreutils
+Requires(preun): coreutils
 
 %description common-lib
 Libraries needed to run the Tomcat Web container (part)
@@ -340,8 +334,8 @@ Requires: %{name}-%{jname} = %{epoch}:%{version}-%{release}
 Requires(post): %{name}-%{jname} = %{epoch}:%{version}-%{release}
 Requires(post): findutils
 Requires(preun): findutils
-Requires(post): /bin/rm
-Requires(preun): /bin/rm
+Requires(post): coreutils
+Requires(preun): coreutils
 
 %description server-lib
 Libraries needed to run the Tomcat Web container (part)
@@ -366,6 +360,7 @@ Provides: jasper5-javadoc
 Javadoc for generated documentation %{name}-%{jname}
 %endif
 
+%if %{without_apisonly}
 %if %{with_ecj}
 %package jasper-eclipse
 Group: Development/Java
@@ -375,22 +370,23 @@ Summary: Jasper OSGi Eclipse plugin
 Jasper OSGi Eclipse plugin that contains class files from jasper-compiler,
 jasper-runtime and ECJ.
 %endif
+%endif
 
 %prep
 %{__rm} -rf ${RPM_BUILD_DIR}/%{name}-%{version}
 
 %setup -q -c -T -a 0
 %setup -q -D -T -a 6
-pushd %{packdname}
+cd %{packdname}
 %patch0 -p0
 %patch1 -p0
-%patch2 -p0
+#%patch2 -p0
 %patch3 -p0
 %patch4 -p0
-%patch5 -p0
+# %%patch5 -p0 <- it seems gone
 %patch7 -p0
 %patch8 -p0
-%patch9 -p0
+#%patch9 -p0
 %patch10 -p0
 %patch12 -p0
 %patch13 -p0
@@ -402,27 +398,19 @@ pushd %{packdname}
 %patch18 -p0
 %endif
 %if %{with_ecj}
-%patch19 -p0
+%patch19 -p0 
 %endif
-popd
+%patch20 -p0 -b .sav
 
-# security fixes
-%patch100 -p1 -b .CVE-2009-2693-2901-2902
-%patch101 -p1 -b .CVE-2010-2227
-%patch102 -p1 -b .CVE-2010-1157
-%patch103 -p0 -b .CVE-2010-3718
-%patch104 -p1 -b .CVE-2011-0013
-%patch105 -p1 -b .CVE-2011-2204
-%patch106 -p1 -b .CVE-2011-2526
-%patch107 -p1 -b .CVE-2011-1184
-%patch108 -p0 -b .CVE-2011-3190
-
-pushd %{packdname}
 %if %{without_ecj}
     %{__rm} %{jname}/src/share/org/apache/jasper/compiler/JDTCompiler.java
 %endif
 
-find -type f -name '*.jsp' | xargs -t perl -pi -e 's/<html:html locale="true">/<html:html>/g'
+#find -type f -name '*.jsp' | xargs -t perl -pi -e 's/<html:html locale="true">/<html:html>/g'
+mkdir commons-launcher
+pushd commons-launcher
+jar xf /usr/share/java/commons-launcher.jar
+cp LauncherBootstrap.class ../..
 popd
 
 %build
@@ -430,19 +418,15 @@ popd
 for dir in ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname} ; do
     find $dir \( -name "*.jar" -o -name "*.class" \) | xargs -t %{__rm} -f
 done
-# copy license for later doc files declaration
-pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}
-    %{__cp} -p build/LICENSE .
-popd
 # build jspapi and servletapi as ant dist will require them later
 pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi
     pushd jsr154
-        %ant -Dservletapi.build="build" \
+        ant -Dservletapi.build="build" \
             -Dservletapi.dist="dist" \
             -Dbuild.compiler="modern" dist
     popd
     pushd jsr152
-        %ant -Dservletapi.build="build" \
+        ant -Dservletapi.build="build" \
             -Dservletapi.dist="dist" \
             -Dbuild.compiler="modern" dist
     popd
@@ -463,9 +447,11 @@ commons-collections.jar=$(build-classpath commons-collections)
 commons-logging.jar=$(build-classpath commons-logging)
 commons-daemon.jar=$(build-classpath commons-daemon)
 junit.jar=$(build-classpath junit)
+%if %{without_apisonly}
 jasper-compiler-jdt.jar=$(build-classpath ecj)
+%endif
 EOBP
-    %ant -Djava.home="%{java_home}" -Dbuild.compiler="modern" javadoc
+    ant -Djava.home="%{java_home}" -Dbuild.compiler="modern" javadoc
 popd
 
 # build tomcat 5
@@ -474,7 +460,7 @@ pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/build
 version=%{version}
 version.build=%{minversion}
 ant.jar=%{_javadir}/ant.jar
-ant-launcher.jar=%{_javadir}/ant.jar
+ant-launcher.jar=%{_javadir}/ant-launcher.jar
 jtc.home=${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/connectors/
 %{jname}.home=${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/%{jname}
 commons-beanutils.jar=$(build-classpath commons-beanutils)
@@ -486,6 +472,7 @@ commons-el.jar=$(build-classpath commons-el)
 commons-fileupload.jar=$(build-classpath commons-fileupload)
 commons-io.jar=$(build-classpath commons-io)
 commons-launcher.jar=$(build-classpath commons-launcher)
+commons-launcher.bootstrap.class=${RPM_BUILD_DIR}/%{name}-%{version}/LauncherBootstrap.class
 commons-logging.jar=$(build-classpath commons-logging)
 commons-logging-api.jar=$(build-classpath commons-logging-api)
 commons-modeler.jar=$(build-classpath commons-modeler)
@@ -497,15 +484,16 @@ jmxri.jar=$(build-classpath mx4j/mx4j-jmx.jar)
 junit.jar=$(build-classpath junit)
 regexp.jar=$(build-classpath regexp)
 servlet-api.jar=${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr154/dist/lib/servlet-api.jar
+%if %{without_apisonly}
 jsp-api.jar=${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr152/dist/lib/jsp-api.jar
+%endif
 servlet.doc=${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr154/dist/docs/api
 xercesImpl.jar=$(build-classpath jaxp_parser_impl)
 xml-apis.jar=$(build-classpath xml-commons-jaxp-1.3-apis)
 struts.jar=$(build-classpath struts)
 struts.lib=%{_datadir}/struts
-activation.jar=$(build-classpath jaf_1_0_2_api)
-mail.jar=$(build-classpath javamail_1_3_1_api)
-jta.jar=$(build-classpath jta_1_0_1B_api)
+mail.jar=$(build-classpath javamail/mail)
+jta.jar=$(build-classpath jta)
 jaas.jar=$(build-classpath jaas)
 jndi.jar=$(build-classpath jndi)
 jdbc20ext.jar=$(build-classpath jdbc-stdext)
@@ -515,17 +503,16 @@ jsse.jar=$(build-classpath jsse/jsse)
 servletapi.build.notrequired=true
 jspapi.build.notrequired=true
 EOBP
-%ant -Dbuild.compiler="modern" -Djava.home="%{java_home}" init
+ant -Dbuild.compiler="modern" -Djava.home="%{java_home}" init
 cp ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr154/dist/lib/servlet-api.jar \
         ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/build/build/common/lib/servlet-api.jar
-    %ant -Dbuild.compiler="modern" -Djava.home="%{java_home}" build
+    ant -Dbuild.compiler="modern" -Djava.home="%{java_home}" -Djdk1.4.present=true -Dtomcat-dbcp.jar=$(build-classpath commons-dbcp) build 
 popd
 # build the connectors
 pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/connectors
 # use the JARs created above to build
-    export CLASSPATH="${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr154/dist/lib/servlet-api.jar:${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/jakarta-tomcat-5/build/server/lib/catalina.jar"
+    export CLASSPATH="${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr154/dist/lib/servlet-api.jar:${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/build/build/server/lib/tomcat-util.jar"
     %{__cat} > build.properties << EOBP
-activation.jar=$(build-classpath jaf_1_0_2_api)
 ant.jar=%{_javadir}/ant.jar
 junit.jar=$(build-classpath junit)
 commons-beanutils.jar=$(build-classpath commons-beanutils)
@@ -534,15 +521,15 @@ commons-daemon.jar=$(build-classpath commons-daemon)
 commons-digester.jar=$(build-classpath commons-digester)
 commons-fileupload.jar=$(build-classpath commons-fileupload)
 commons-io.jar=$(build-classpath commons-io)
+commons-launcher.jar=$(build-classpath commons-launcher)
 commons-logging.jar=$(build-classpath commons-logging)
 commons-logging-api.jar=$(build-classpath commons-logging-api)
 commons-modeler.jar=$(build-classpath commons-modeler)
 commons-pool.jar=$(build-classpath commons-pool)
 regexp.jar=$(build-classpath regexp)
 jmx.jar=$(build-classpath mx4j/mx4j-jmx)
-activation.jar=$(build-classpath jaf_1_0_2_api)
-mail.jar=$(build-classpath javamail_1_3_1_api)
-jta.jar=$(build-classpath jta_1_0_1B_api)
+mail.jar=$(build-classpath javamail/mail)
+jta.jar=$(build-classpath jta)
 jaas.jar=$(build-classpath jaas)
 jndi.jar=$(build-classpath jndi)
 jdbc20ext.jar=$(build-classpath jdbc-stdext)
@@ -551,10 +538,11 @@ jnet.jar=$(build-classpath jsse/jnet)
 jsse.jar=$(build-classpath jsse/jsse)
 tomcat5.home=../../build/build
 EOBP
-    %ant -Dbuild.compiler="modern" -Djava.home="%{java_home}" build
+    ant -Dbuild.compiler="modern" -Djava.home="%{java_home}" build
 popd
 %endif
 
+%if %{without_apisonly}
 # create jasper-eclipse jar
 %if %{with_ecj}
 mkdir -p org.apache.jasper
@@ -568,6 +556,7 @@ rm -f plugin.properties plugin.xml about.html jdtCompilerAdapter.jar META-INF/ec
 zip -qq -r ../org.apache.jasper_5.5.17.v200706111724.jar .
 popd
 %endif
+%endif
 
 # inject OSGi manifests
 mkdir -p META-INF
@@ -576,13 +565,15 @@ touch META-INF/MANIFEST.MF
 zip -u %{packdname}/servletapi/jsr154/dist/lib/servlet-api.jar META-INF/MANIFEST.MF
 cp -p %{SOURCE9} META-INF/MANIFEST.MF
 touch META-INF/MANIFEST.MF
+%if %{without_apisonly}
 zip -u %{packdname}/servletapi/jsr152/dist/lib/jsp-api.jar META-INF/MANIFEST.MF
+%endif
 
 %install
 %{__rm} -rf $RPM_BUILD_ROOT
 %{__install} -d -m 755 ${RPM_BUILD_ROOT}%{_javadir}
 %if %{without_apisonly}
-export CLASSPATH="$(build-classpath xalan-j2 xml-commons-jaxp-1.3-apis jakarta-taglibs-core jakarta-taglibs-standard struts-taglib):${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr152/dist/lib/jsp-api.jar":${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr154/dist/lib/servlet-api.jar
+export CLASSPATH="$(build-classpath xalan-j2 xml-commons-jaxp-1.3-apis jakarta-taglibs-core jakarta-taglibs-standard):${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr152/dist/lib/jsp-api.jar:${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi/jsr154/dist/lib/servlet-api.jar"
 # build initial path structure
 %{__install} -d -m 755 \
     ${RPM_BUILD_ROOT}{%{confdir},%{logdir},%{homedir},%{bindir}}
@@ -635,8 +626,8 @@ EOT
 %{__rm} -f %{name}.conf
 pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/build
     export usejikes="false"
-    export OPT_JAR_LIST="ant/ant-trax xalan-j2-serializer"
-    %ant -Dbuild.compiler="modern" -Djava.home=%{java_home} dist
+    export OPT_JAR_LIST="ant/ant-nodeps xalan-j2-serializer"
+    ant -Dbuild.compiler="modern" -Djava.home=%{java_home} -Djasper-compiler-jdt.jar=%{_javadir}/ecj.jar -Dtomcat-dbcp.jar=$(build-classpath commons-dbcp) dist
     pushd dist
         %{__mv} bin/* ${RPM_BUILD_ROOT}%{bindir}
         %{__mv} common/* ${RPM_BUILD_ROOT}%{commondir}
@@ -644,10 +635,6 @@ pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/build
         %{__mv} server/* ${RPM_BUILD_ROOT}%{serverdir}
         %{__mv} shared/* ${RPM_BUILD_ROOT}%{shareddir}
         %{__mv} webapps/* ${RPM_BUILD_ROOT}%{appdir}
-    popd
-    pushd build/conf
-        %{__mv} uriworkermap.properties workers.properties \
-            workers.properties.minimal ${RPM_BUILD_ROOT}%{confdir}
     popd
 popd
 # rename catalina.sh into dtomcat5 to let wrapper take precedence
@@ -877,8 +864,11 @@ pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi
             servletapi5.jar
     popd
     # depmap frag for standard alternative
-    %add_to_maven_depmap javax.servlet servlet-api %{servletspec} JPP servlet_2_4_api
-    %add_to_maven_depmap tomcat servlet-api %{version} JPP %{name}-servlet-%{servletspec}-api
+    %if %{without_apisonly}
+       %add_to_maven_depmap javax.servlet servlet-api %{servletspec} JPP servlet_2_4_api
+       %add_to_maven_depmap tomcat servlet-api %{version} JPP %{name}-servlet-%{servletspec}-api
+    %endif
+    %{__mkdir} -p $RPM_BUILD_ROOT/%{_datadir}/maven2/poms/ ||:
     %{__install} -m 644 \
             ${RPM_BUILD_DIR}/%{name}-%{version}/tomcat5-poms/servlet-api-%{version}.pom \
             $RPM_BUILD_ROOT/%{_datadir}/maven2/poms/JPP-%{name}-servlet-%{servletspec}-api.pom
@@ -900,8 +890,10 @@ pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi
         %{__ln_s} -f %{name}-jsp-%{jspspec}-api-%{version}.jar \
             jspapi.jar
     popd
-    %add_to_maven_depmap javax.servlet jsp-api %{jspspec} JPP jsp_2_0_api
-    %add_to_maven_depmap tomcat jsp-api %{version} JPP %{name}-jsp-%{jspspec}-api
+    %if %{without_apisonly}
+       %add_to_maven_depmap javax.servlet jsp-api %{jspspec} JPP jsp_2_0_api
+       %add_to_maven_depmap tomcat jsp-api %{version} JPP %{name}-jsp-%{jspspec}-api
+    %endif
     %{__install} -m 644 \
             ${RPM_BUILD_DIR}/%{name}-%{version}/tomcat5-poms/jsp-api-%{version}.pom \
             $RPM_BUILD_ROOT/%{_datadir}/maven2/poms/JPP-%{name}-jsp-%{jspspec}-api.pom
@@ -933,20 +925,11 @@ pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/%{jname}
 popd
 %endif
 
+%if %{without_apisonly}
 %if %{with_ecj}
 %{__install} -d -m 755 ${RPM_BUILD_ROOT}%{_datadir}/eclipse/plugins
 %{__cp} -p org.apache.jasper_5.5.17.v200706111724.jar ${RPM_BUILD_ROOT}%{_datadir}/eclipse/plugins
 %endif
-
-%if %{gcj_support}
-# Remove non-standard jars from the list for aot compilation
-%{_bindir}/aot-compile-rpm \
-    --exclude var/lib/%{name}/webapps/tomcat-docs/appdev/sample/sample.war \
-    --exclude var/lib/%{name}/webapps/servlets-examples/WEB-INF/classes \
-    --exclude var/lib/%{name}/webapps/jsp-examples/WEB-INF/classes \
-    --exclude var/lib/%{name}/webapps/jsp-examples/plugin/applet \
-    --exclude var/lib/%{name}/server/lib/servlets-cgi.renametojar \
-    --exclude var/lib/%{name}/server/lib/servlets-ssi.renametojar
 %endif
 
 %clean
@@ -980,8 +963,8 @@ done
 %{__ln_s} $(build-classpath tomcat5/tomcat-juli) %{bindir}  2>&1
 build-jar-repository %{commondir}/endorsed jaxp_parser_impl \
     xml-commons-jaxp-1.3-apis 2>&1
-build-jar-repository %{commondir}/lib commons-collections-tomcat5 \
-    commons-dbcp-tomcat5 commons-el commons-pool-tomcat5 jaf javamail jsp \
+build-jar-repository %{commondir}/lib commons-collections \
+    commons-dbcp commons-el commons-pool javamail/mail jsp \
     %{name}/naming-factory %{name}/naming-resources servlet \
     %{jname}5-compiler %{jname}5-runtime 2>&1
 %if %{with_ecj}
@@ -993,49 +976,15 @@ build-jar-repository %{serverdir}/lib catalina-ant5 commons-modeler \
     %{name}/servlets-default %{name}/servlets-invoker %{name}/servlets-webdav \
     %{name}/tomcat-ajp %{name}/tomcat-apr %{name}/tomcat-coyote \
     %{name}/tomcat-http %{name}/tomcat-jkstatus-ant %{name}/tomcat-util 2>&1
-%if %{gcj_support}
-    if [ -x %{_bindir}/rebuild-gcj-db ]; then %{_bindir}/rebuild-gcj-db || true ; fi
-%endif
 
 %postun
 %update_maven_depmap
-%if %{gcj_support}
-if [ -x %{_bindir}/rebuild-gcj-db ]; then %{_bindir}/rebuild-gcj-db || true ; fi
-%endif
 
-%if %{gcj_support}
-%post common-lib
-if [ -x %{_bindir}/rebuild-gcj-db ]; then %{_bindir}/rebuild-gcj-db || true ; fi
-%endif
-
-%if %{gcj_support}
-%postun common-lib
-if [ -x %{_bindir}/rebuild-gcj-db ]; then %{_bindir}/rebuild-gcj-db || true ; fi
-%endif
-
-%if %{gcj_support}
-%post server-lib
-if [ -x %{_bindir}/rebuild-gcj-db ]; then %{_bindir}/rebuild-gcj-db || true ; fi
-%endif
-
-%if %{gcj_support}
-%postun server-lib
-if [ -x %{_bindir}/rebuild-gcj-db ]; then %{_bindir}/rebuild-gcj-db || true ; fi
-%endif
-
-%post webapps
+%post webapps 
 # Create automated links - since all needed extensions may not have been
 # installed for this jvm output is muted
 build-jar-repository %{appdir}/jsp-examples/WEB-INF/lib \
     jakarta-taglibs-core jakarta-taglibs-standard 2>&1
-%if %{gcj_support}
-    if [ -x %{_bindir}/rebuild-gcj-db ]; then %{_bindir}/rebuild-gcj-db || true ; fi
-%endif
-
-%if %{gcj_support}
-%postun webapps
-    if [ -x %{_bindir}/rebuild-gcj-db ]; then %{_bindir}/rebuild-gcj-db || true ; fi
-%endif
 
 %post admin-webapps
 # Remove old automated symlinks
@@ -1044,20 +993,13 @@ find %{serverdir}/webapps/admin/WEB-INF/lib -name '\[*\]*.jar' -type d \
 # Create automated links - since all needed extensions may not have been
 # installed for this jvm output is muted
 build-jar-repository %{serverdir}/webapps/admin/WEB-INF/lib \
-    commons-beanutils commons-collections commons-digester struts struts-taglib \
+    commons-beanutils commons-collections commons-digester struts \
     %{name}/catalina-admin 2>&1
 build-jar-repository %{serverdir}/webapps/host-manager/WEB-INF/lib \
     %{name}/catalina-host-manager 2>&1
 build-jar-repository %{serverdir}/webapps/manager/WEB-INF/lib \
     commons-io commons-fileupload %{name}/catalina-manager 2>&1
-%if %{gcj_support}
-    if [ -x %{_bindir}/rebuild-gcj-db ]; then %{_bindir}/rebuild-gcj-db || true ; fi
-%endif
 
-%if %{gcj_support}
-%postun admin-webapps
-    if [ -x %{_bindir}/rebuild-gcj-db ]; then %{_bindir}/rebuild-gcj-db || true ; fi
-%endif
 %endif
 
 %post servlet-%{servletspec}-api
@@ -1065,9 +1007,6 @@ build-jar-repository %{serverdir}/webapps/manager/WEB-INF/lib \
     %{_javadir}/%{name}-servlet-%{servletspec}-api.jar 20400
 %{_sbindir}/update-alternatives --install %{_javadir}/servlet_2_4_api.jar servlet_2_4_api \
     %{_javadir}/%{name}-servlet-%{servletspec}-api.jar 20400
-%if %{gcj_support}
-    if [ -x %{_bindir}/rebuild-gcj-db ]; then %{_bindir}/rebuild-gcj-db || true ; fi
-%endif
 
 %post servlet-%{servletspec}-api-javadoc
 %{__rm} -f %{_javadocdir}/servletapi # legacy symlink
@@ -1079,18 +1018,12 @@ if [ "$1" = "0" ]; then
     %{_sbindir}/update-alternatives --remove servlet_2_4_api \
         %{_javadir}/%{name}-servlet-%{servletspec}-api.jar
 fi
-%if %{gcj_support}
-    if [ -x %{_bindir}/rebuild-gcj-db ]; then %{_bindir}/rebuild-gcj-db || true ; fi
-%endif
 
 %post jsp-%{jspspec}-api
 %{_sbindir}/update-alternatives --install %{_javadir}/jsp.jar jsp \
     %{_javadir}/%{name}-jsp-%{jspspec}-api.jar 20000
 %{_sbindir}/update-alternatives --install %{_javadir}/jsp_2_0_api.jar jsp_2_0_api \
     %{_javadir}/%{name}-jsp-%{jspspec}-api.jar 20000
-%if %{gcj_support}
-    if [ -x %{_bindir}/rebuild-gcj-db ]; then %{_bindir}/rebuild-gcj-db || true ; fi
-%endif
 
 %post jsp-%{jspspec}-api-javadoc
 %{__rm} -f %{_javadocdir}/jsp-api # legacy symlink
@@ -1102,9 +1035,6 @@ if [ "$1" = "0" ]; then
     %{_sbindir}/update-alternatives --remove jsp_2_0_api \
         %{_javadir}/%{name}-jsp-%{jspspec}-api.jar
 fi
-%if %{gcj_support}
-    if [ -x %{_bindir}/rebuild-gcj-db ]; then %{_bindir}/rebuild-gcj-db || true ; fi
-%endif
 
 %if %{without_apisonly}
 %preun
@@ -1149,7 +1079,8 @@ fi
 %if %{without_apisonly}
 %files
 %defattr(0644,root,root,0755)
-%doc %{packdname}/build/{LICENSE,RELE*,RUNNING.txt,BENCHMARKS.txt}
+%doc %{packdname}/LICENSE
+%doc %{packdname}/build/{RELE*,RUNNING.txt,BENCHMARKS.txt}
 # symlinks
 %{_datadir}/%{name}/common
 %{_datadir}/%{name}/temp
@@ -1198,32 +1129,18 @@ fi
 %config(noreplace) %{confdir}/server.xml
 %config(noreplace) %{confdir}/web.xml
 %config(noreplace) %{confdir}/context.xml
-%config(noreplace) %{confdir}/uriworkermap.properties
-%config(noreplace) %{confdir}/workers.properties
-%config(noreplace) %{confdir}/workers.properties.minimal
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %{commondir}/i18n/*
-%attr(0644,root,root) %{_mavendepmapfragdir}/*
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-parent.pom
-%if %{gcj_support}
-%dir %{_libdir}/gcj/%{name}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/bootstrap*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/commons-daemon*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/commons-logging-api*
-#%attr(-,root,root) %{_libdir}/gcj/%{name}/tomcat-juli*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/tomcat-jkstatus-ant*
-%endif
+%{_mavendepmapfragdir}/*
+%{_datadir}/maven2/poms/JPP.tomcat5-parent.pom
 
 %files common-lib
 %defattr(0644,root,root,0755)
 %dir %{_javadir}/%{name}
 %{_javadir}/%{name}/naming*.jar
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-naming-factory.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-naming-resources.pom
-%if %{gcj_support}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/naming-*
-%endif
+%{_datadir}/maven2/poms/JPP.tomcat5-naming-factory.pom
+%{_datadir}/maven2/poms/JPP.tomcat5-naming-resources.pom
 
 %files server-lib
 %defattr(0644,root,root,0755)
@@ -1238,37 +1155,21 @@ fi
 %{_javadir}/%{name}/catalina-storeconfig*.jar
 %{_javadir}/%{name}/servlets*.jar
 %{_javadir}/%{name}/tomcat*.jar
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP-catalina-ant5.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-catalina-ant-jmx.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-catalina-cluster.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-catalina.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-catalina-optional.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-catalina-storeconfig.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-servlets-default.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-servlets-invoker.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-servlets-webdav.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-tomcat-ajp.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-tomcat-apr.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-tomcat-coyote.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-tomcat-http.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-tomcat-jkstatus-ant.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-tomcat-juli.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-tomcat-util.pom
-%if %{gcj_support}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/catalina-ant*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/catalina-cluster*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/catalina-optional*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/catalina-storeconfig*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/catalina-%{version}.jar*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/servlets-default*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/servlets-invoker*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/servlets-webdav*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/tomcat-ajp*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/tomcat-apr*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/tomcat-coyote*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/tomcat-http*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/tomcat-util*
-%endif
+%{_datadir}/maven2/poms/JPP-catalina-ant5.pom
+%{_datadir}/maven2/poms/JPP.tomcat5-catalina-ant-jmx.pom
+%{_datadir}/maven2/poms/JPP.tomcat5-catalina-cluster.pom
+%{_datadir}/maven2/poms/JPP.tomcat5-catalina.pom
+%{_datadir}/maven2/poms/JPP.tomcat5-catalina-optional.pom
+%{_datadir}/maven2/poms/JPP.tomcat5-catalina-storeconfig.pom
+%{_datadir}/maven2/poms/JPP.tomcat5-servlets-default.pom
+%{_datadir}/maven2/poms/JPP.tomcat5-servlets-invoker.pom
+%{_datadir}/maven2/poms/JPP.tomcat5-servlets-webdav.pom
+%{_datadir}/maven2/poms/JPP.tomcat5-tomcat-ajp.pom
+%{_datadir}/maven2/poms/JPP.tomcat5-tomcat-apr.pom
+%{_datadir}/maven2/poms/JPP.tomcat5-tomcat-coyote.pom
+%{_datadir}/maven2/poms/JPP.tomcat5-tomcat-http.pom
+%{_datadir}/maven2/poms/JPP.tomcat5-tomcat-juli.pom
+%{_datadir}/maven2/poms/JPP.tomcat5-tomcat-util.pom
 
 %files webapps
 %defattr(0644,root,tomcat,0775)
@@ -1282,11 +1183,6 @@ fi
 %{appdir}/tomcat-docs/*
 %dir %{appdir}/webdav
 %{appdir}/webdav/*
-%if %{gcj_support}
-%ifnarch ppc64 s390x
-%attr(-,root,root) %{_libdir}/gcj/%{name}/catalina-root*
-%endif
-%endif
 
 %files admin-webapps
 %defattr(0640,root,tomcat,0750)
@@ -1300,15 +1196,9 @@ fi
 %attr(0644,root,root) %{_javadir}/%{name}/catalina-admin*.jar
 %attr(0644,root,root) %{_javadir}/%{name}/catalina-manager*.jar
 %attr(0644,root,root) %{_javadir}/%{name}/catalina-host-manager*.jar
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-catalina-admin.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-catalina-host-manager.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP.tomcat5-catalina-manager.pom
-%if %{gcj_support}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/catalina-admin*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/catalina-balancer*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/catalina-host-manager*
-%attr(-,root,root) %{_libdir}/gcj/%{name}/catalina-manager*
-%endif
+%{_datadir}/maven2/poms/JPP.tomcat5-catalina-admin.pom
+%{_datadir}/maven2/poms/JPP.tomcat5-catalina-host-manager.pom
+%{_datadir}/maven2/poms/JPP.tomcat5-catalina-manager.pom
 
 %files %{jname}
 %defattr(0644,root,root,0755)
@@ -1316,11 +1206,8 @@ fi
 %{_javadir}/%{jname}5-*.jar
 %attr(0755,root,root) %{_bindir}/%{jname}*.sh
 %attr(0755,root,root) %{_bindir}/jspc*.sh
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP-jasper5-compiler.pom
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP-jasper5-runtime.pom
-%if %{gcj_support}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/%{jname}5-*
-%endif
+%{_datadir}/maven2/poms/JPP-jasper5-compiler.pom
+%{_datadir}/maven2/poms/JPP-jasper5-runtime.pom
 
 %files %{jname}-javadoc
 %defattr(0644,root,root,0755)
@@ -1330,13 +1217,10 @@ fi
 
 %files servlet-%{servletspec}-api
 %defattr(0644,root,root,0755)
-%doc %{packdname}/build/LICENSE
+%doc %{packdname}/LICENSE
 %{_javadir}/%{name}-servlet-%{servletspec}-api*.jar
 %{_javadir}/servletapi5.jar
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP-tomcat5-servlet-2.4-api.pom
-%if %{gcj_support}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/%{name}-servlet-%{servletspec}-api*
-%endif
+%{_datadir}/maven2/poms/JPP-tomcat5-servlet-2.4-api.pom
 
 %files servlet-%{servletspec}-api-javadoc
 %defattr(0644,root,root,0755)
@@ -1345,19 +1229,17 @@ fi
 
 %files jsp-%{jspspec}-api
 %defattr(0644,root,root,0755)
-%doc %{packdname}/build/LICENSE
+%doc %{packdname}/LICENSE
 %{_javadir}/%{name}-jsp-%{jspspec}-api*.jar
 %{_javadir}/jspapi.jar
-%attr(0644,root,root) %{_datadir}/maven2/poms/JPP-tomcat5-jsp-2.0-api.pom
-%if %{gcj_support}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/%{name}-jsp-%{jspspec}-api*
-%endif
+%{_datadir}/maven2/poms/JPP-tomcat5-jsp-2.0-api.pom
 
 %files jsp-%{jspspec}-api-javadoc
 %defattr(0644,root,root,0755)
 %{_javadocdir}/%{name}-jsp-%{jspspec}-api-%{version}
 %{_javadocdir}/%{name}-jsp-%{jspspec}-api
 
+%if %{without_apisonly}
 %if %{with_ecj}
 %files jasper-eclipse
 %defattr(0644,root,root,0755)
@@ -1365,3 +1247,6 @@ fi
 %dir %{_datadir}/eclipse/plugins
 %{_datadir}/eclipse/plugins/org.apache.jasper_*
 %endif
+%endif
+
+
