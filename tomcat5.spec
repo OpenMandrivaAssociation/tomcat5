@@ -41,7 +41,7 @@
 %define full_jname jasper5
 %define jname jasper
 %define majversion 5.5
-%define minversion 34
+%define minversion 31
 %define servletspec 2.4
 %define jspspec 2.0
 
@@ -67,7 +67,7 @@
 Name: tomcat5
 Epoch: 0
 Version: %{majversion}.%{minversion}
-Release: 1
+Release: 3
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -383,7 +383,7 @@ cd %{packdname}
 #%patch2 -p0
 %patch3 -p0
 %patch4 -p0
-# %%patch5 -p0 <- it seems gone
+%patch5 -p0
 %patch7 -p0
 %patch8 -p0
 #%patch9 -p0
