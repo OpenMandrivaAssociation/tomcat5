@@ -120,18 +120,18 @@ BuildRequires: ecj >= 0:3.3.1.1
 %endif
 BuildRequires: ant-nodeps
 BuildRequires: xalan-j2
-BuildRequires: jakarta-commons-beanutils >= 0:1.7
-BuildRequires: jakarta-commons-collections >= 0:3.1
-BuildRequires: jakarta-commons-daemon >= 0:1.0.1
-BuildRequires: jakarta-commons-dbcp >= 0:1.2.1
-BuildRequires: jakarta-commons-digester >= 0:1.7
-BuildRequires: jakarta-commons-logging >= 0:1.0.4
-BuildRequires: jakarta-commons-fileupload >= 0:1.0
-BuildRequires: jakarta-commons-io >= 0:1.3
-BuildRequires: jakarta-commons-modeler >= 0:2.0
-BuildRequires: jakarta-commons-pool >= 0:1.2
-BuildRequires: jakarta-commons-launcher >= 0:0.9
-BuildRequires: jakarta-commons-el >= 0:1.0
+BuildRequires: apache-commons-beanutils >= 0:1.7
+BuildRequires: apache-commons-collections >= 0:3.1
+BuildRequires: apache-commons-daemon >= 0:1.0.1
+BuildRequires: apache-commons-dbcp >= 0:1.2.1
+BuildRequires: apache-commons-digester >= 0:1.7
+BuildRequires: apache-commons-logging >= 0:1.0.4
+BuildRequires: apache-commons-fileupload >= 0:1.0
+BuildRequires: apache-commons-io >= 0:1.3
+BuildRequires: apache-commons-modeler >= 0:2.0
+BuildRequires: apache-commons-pool >= 0:1.2
+BuildRequires: apache-commons-launcher >= 0:0.9
+BuildRequires: apache-commons-el >= 0:1.0
 BuildRequires: junit >= 0:3.8.1
 BuildRequires: regexp >= 0:1.3
 BuildRequires: struts >= 0:1.2.9
@@ -141,7 +141,7 @@ BuildRequires: zip
 # xml-commons-apis is needed by Xerces-J2
 BuildRequires: xml-commons-jaxp-1.3-apis
 # FIXME taglibs-standard is not listed in the Tomcat build.properties.default
-BuildRequires: jakarta-taglibs-standard >= 0:1.1.0
+#BuildRequires: jakarta-taglibs-standard >= 0:1.1.0
 # formerly non-free stuff
 # jta can be provided by geronimo-jta-version-api
 BuildRequires: jta
@@ -874,7 +874,7 @@ pushd %{_builddir}/%{name}-%{version}/%{packdname}/servletapi
             %{buildroot}/%{_datadir}/maven2/poms/JPP-%{name}-servlet-%{servletspec}-api.pom
     # javadoc servlet
     %{__install} -d -m 755 %{buildroot}%{_javadocdir}/%{name}-servlet-%{servletspec}-api-%{version}
-    %{__cp} -pr jsr154/build/docs/api/* \
+    cp -pr jsr154/build/docs/api/* \
         %{buildroot}%{_javadocdir}/%{name}-servlet-%{servletspec}-api-%{version}
     %{__ln_s} -f %{name}-servlet-%{servletspec}-api-%{version} \
         %{buildroot}%{_javadocdir}/%{name}-servlet-%{servletspec}-api
@@ -899,7 +899,7 @@ pushd %{_builddir}/%{name}-%{version}/%{packdname}/servletapi
             %{buildroot}/%{_datadir}/maven2/poms/JPP-%{name}-jsp-%{jspspec}-api.pom
     # javadoc jsp
     %{__install} -d -m 755 %{buildroot}%{_javadocdir}/%{name}-jsp-%{jspspec}-api-%{version}
-    %{__cp} -pr jsr152/build/docs/api/* \
+    cp -pr jsr152/build/docs/api/* \
         %{buildroot}%{_javadocdir}/%{name}-jsp-%{jspspec}-api-%{version}
     %{__ln_s} %{name}-jsp-%{jspspec}-api-%{version} \
         %{buildroot}%{_javadocdir}/%{name}-jsp-%{jspspec}-api
@@ -919,7 +919,7 @@ popd
 # javadoc
 %{__install} -d -m 755 %{buildroot}%{_javadocdir}/%{jname}-%{version}
 pushd %{_builddir}/%{name}-%{version}/%{packdname}/%{jname}
-    %{__cp} -pr build/javadoc/* \
+    cp -pr build/javadoc/* \
         %{buildroot}%{_javadocdir}/%{jname}-%{version}
     %{__ln_s} %{jname}-%{version} %{buildroot}%{_javadocdir}/%{jname}
 popd
@@ -928,7 +928,7 @@ popd
 %if %{without_apisonly}
 %if %{with_ecj}
 %{__install} -d -m 755 %{buildroot}%{_datadir}/eclipse/plugins
-%{__cp} -p org.apache.jasper_5.5.17.v200706111724.jar %{buildroot}%{_datadir}/eclipse/plugins
+cp -p org.apache.jasper_5.5.17.v200706111724.jar %{buildroot}%{_datadir}/eclipse/plugins
 %endif
 %endif
 
@@ -1115,7 +1115,8 @@ fi
 %attr(0755,tomcat,tomcat) %dir %{logdir}
 %attr(0775,root,tomcat) %dir %{confdir}/Catalina
 %attr(0775,root,tomcat) %dir %{confdir}/Catalina/localhost
-%attr(0755,root,root) %{_bindir}/*
+%attr(0755,root,root) %{_bindir}/tomcat5
+%attr(0755,root,root) %{_bindir}/dtomcat5
 %attr(0755,root,root) %{bindir}/relink
 %attr(0644,root,root) %{bindir}/*.jar
 %attr(0644,root,root) %{bindir}/*.xml
@@ -1201,11 +1202,13 @@ fi
 %{_datadir}/maven2/poms/JPP.tomcat5-catalina-manager.pom
 
 %files %{jname}
-%defattr(0644,root,root,0755)
-%doc %{_builddir}/%{name}-%{version}/%{packdname}/%{jname}/doc/jspc.html
+#remove for now
+##doc %{_builddir}/%{name}-%{version}/%{packdname}/%{jname}/doc/jspc.html
 %{_javadir}/%{jname}5-*.jar
 %attr(0755,root,root) %{_bindir}/%{jname}*.sh
 %attr(0755,root,root) %{_bindir}/jspc*.sh
+%dir %{_bindir}
+%dir %{_mavenpomdir}
 %{_datadir}/maven2/poms/JPP-jasper5-compiler.pom
 %{_datadir}/maven2/poms/JPP-jasper5-runtime.pom
 
