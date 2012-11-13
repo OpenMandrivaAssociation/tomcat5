@@ -1,0 +1,72 @@
+--- connectors/jk/java/org/apache/jk/server/JkMain.java.sav	2006-03-23 16:56:20.000000000 +0100
++++ connectors/jk/java/org/apache/jk/server/JkMain.java	2006-03-23 16:57:27.000000000 +0100
+@@ -101,7 +101,7 @@
+         return jkMain;
+     }
+ 
+-    private static String DEFAULT_HTTPS="com.sun.net.ssl.internal.www.protocol";
++    private static String DEFAULT_HTTPS="javax.net.ssl.internal.www.protocol";
+     private void initHTTPSUrls() {
+         try {
+             // 11657: if only ajp is used, https: redirects need to work ( at least for 1.3+)
+--- connectors/util/java/org/apache/tomcat/util/net/jsse/JSSE13SocketFactory.java.sav	2006-03-23 16:58:48.000000000 +0100
++++ connectors/util/java/org/apache/tomcat/util/net/jsse/JSSE13SocketFactory.java	2006-03-23 17:01:34.000000000 +0100
+@@ -67,13 +67,13 @@
+      */
+      void init() throws IOException {
+         try {
+-            try {
+-                Class ssps = Class.forName("sun.security.provider.Sun");
+-                Security.addProvider ((Provider)ssps.newInstance());
+-            }catch(Exception cnfe) {
++            //try {
++            //    Class ssps = Class.forName("sun.security.provider.Sun");
++            //    Security.addProvider ((Provider)ssps.newInstance());
++            //}catch(Exception cnfe) {
+                 //Ignore, since this is a non-Sun JVM
+-            }
+-            Security.addProvider (new com.sun.net.ssl.internal.ssl.Provider());
++            //}
++            //Security.addProvider (new com.sun.net.ssl.internal.ssl.Provider());
+ 
+             String clientAuthStr = (String)attributes.get("clientauth");
+             if("true".equalsIgnoreCase(clientAuthStr) || 
+@@ -91,8 +91,8 @@
+             if (algorithm == null) algorithm = defaultAlgorithm;
+ 
+             // Set up KeyManager, which will extract server key
+-            com.sun.net.ssl.KeyManagerFactory kmf = 
+-                com.sun.net.ssl.KeyManagerFactory.getInstance(algorithm);
++            javax.net.ssl.KeyManagerFactory kmf = 
++                javax.net.ssl.KeyManagerFactory.getInstance(algorithm);
+             String keystoreType = (String)attributes.get("keystoreType");
+             if (keystoreType == null) {
+                 keystoreType = defaultKeystoreType;
+@@ -102,22 +102,22 @@
+                      keystorePass.toCharArray());
+ 
+             // Set up TrustManager
+-            com.sun.net.ssl.TrustManager[] tm = null;
++            javax.net.ssl.TrustManager[] tm = null;
+             String truststoreType = (String)attributes.get("truststoreType");
+             if(truststoreType == null) {
+                 truststoreType = keystoreType;
+             }
+             KeyStore trustStore = getTrustStore(truststoreType);
+             if (trustStore != null) {
+-                com.sun.net.ssl.TrustManagerFactory tmf =
+-                    com.sun.net.ssl.TrustManagerFactory.getInstance("SunX509");
++                javax.net.ssl.TrustManagerFactory tmf =
++                    javax.net.ssl.TrustManagerFactory.getInstance("SunX509");
+                 tmf.init(trustStore);
+                 tm = tmf.getTrustManagers();
+             }
+ 
+             // Create and init SSLContext
+-            com.sun.net.ssl.SSLContext context = 
+-                com.sun.net.ssl.SSLContext.getInstance(protocol); 
++            javax.net.ssl.SSLContext context = 
++                javax.net.ssl.SSLContext.getInstance(protocol); 
+             context.init(kmf.getKeyManagers(), tm, new SecureRandom());
+ 
+             // Create proxy

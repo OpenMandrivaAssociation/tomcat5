@@ -1,0 +1,21 @@
+--- connectors/util/build.xml.old	2009-11-09 23:05:09.674377914 +0200
++++ connectors/util/build.xml	2009-11-09 23:06:19.653749062 +0200
+@@ -60,8 +60,9 @@
+         <available property="puretls.present" file="${puretls.jar}"/>
+         <available property="commons-logging.present" file="${commons-logging.jar}"/>
+         <available property="modeler.present" file="${commons-modeler.jar}"/>
+-	<available property="jdk1.4.present" classname="java.lang.CharSequence" />
++	<condition property="build.javac.source" value="1.5" else="1.4">
+         <available property="jdk1.5.present" classname="javax.net.ssl.CertPathTrustManagerParameters" />
++	</condition>
+     </target>
+ 
+     <target name="build-prepare" depends="detect">
+@@ -89,6 +90,7 @@
+ 	       debug="${compile.debug}"
+ 	       optimize="off"
+ 	       verbose="off"
++	       source="${build.javac.source}"
+ 	       excludes="**/CVS/**"
+            encoding="ISO-8859-1">
+ 	    <classpath>

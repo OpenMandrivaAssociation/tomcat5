@@ -1,0 +1,12 @@
+--- container/webapps/admin/admin.xml.sav	2006-03-23 16:16:51.000000000 +0100
++++ container/webapps/admin/admin.xml	2006-03-23 16:17:49.000000000 +0100
+@@ -17,4 +17,9 @@
+     allow="127.0.0.1"/>
+   -->
+ 
++  <!-- Allow linking since JPackage do not install jar as copies -->
++
++  <Resources className="org.apache.naming.resources.FileDirContext"
++             allowLinking="true"/>
++
+ </Context>

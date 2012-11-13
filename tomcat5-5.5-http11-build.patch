@@ -1,0 +1,23 @@
+--- connectors/http11/build.xml.old	2009-11-09 23:54:25.202500887 +0200
++++ connectors/http11/build.xml	2009-11-09 23:55:18.260499403 +0200
+@@ -48,7 +48,7 @@
+ 
+   <!-- The locations of necessary jar files -->
+   <property name="tomcat-util.jar"  value="${util.home}/build/lib/tomcat-util.jar"/>
+-  <property name="tomcat-jni.jar" value="../jni/dist/tomcat-native-1.0.0.jar" />
++  <property name="tomcat-jni.jar" value="../../build/build/server/lib/tomcat-apr.jar" />  
+   <property name="tomcat-coyote.jar" value="${coyote.home}/build/lib/tomcat-coyote.jar"/>
+   <property name="tomcat33-coyote.jar" 
+           value="${coyote.home}/build/lib/tomcat33-coyote.jar"/>
+@@ -187,7 +187,10 @@
+           optimize="${compile.optimize}"
+           encoding="ISO-8859-1">
+       <exclude name="org\apache\coyote\http11\*Apr*" unless="jdk.1.4.present" />
+-      <classpath refid="compile.classpath"/>
++      <classpath>
++         <path refid="compile.classpath"/>
++         <pathelement location="${build.home}/../../jakarta-tomcat-5/build/classes"/>
++      </classpath>
+     </javac>
+     <copy    todir="${build.home}/classes" filtering="on" encoding="ISO-8859-1">
+       <fileset dir="${source.home}" excludes="**/*.java"/>

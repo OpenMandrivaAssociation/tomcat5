@@ -1,0 +1,27 @@
+--- connectors/jk/build.xml.p14	2008-07-14 11:55:14.000000000 -0400
++++ connectors/jk/build.xml	2008-07-14 11:58:29.000000000 -0400
+@@ -45,7 +45,7 @@
+     <property name="tomcat-jkshm.jar" value="${jk.build}/lib/jkshm.jar" />
+     <property name="tomcat-jk2.jar" value="${jk.build}/lib/tomcat-jk2.jar" />
+     <property name="tomcat-jni.jar" value="${jk.build}/lib/tomcat-jni.jar" />
+-    <property name="tomcat-apr.jar" value="../jni/dist/tomcat-native-1.0.0.jar" />
++    <property name="tomcat-apr.jar" value="../../build/build/server/lib/tomcat-apr.jar" />
+ 
+     <!-- default locations, overrident by properties -->
+     <property name="base.path" location="/usr/share/java"/>
+@@ -230,6 +230,7 @@
+             <exclude name="org/apache/jk/ant/**" />
+ 	    <classpath>
+ 	       <pathelement location="${tomcat-apr.jar}" />
++               <pathelement location="${jk.build}/../../build/build/classes"/>
+ 	       <path refid="xml-apis.classpath"/>
+ 	       <path refid="build-main.classpath"/>
+ 	    </classpath>
+@@ -269,6 +270,7 @@
+             <include name="org/apache/coyote/ajp/**"/>
+             <include name="org/apache/jk/config/**"/>
+ 	    <classpath>
++               <pathelement location="${jk.build}/../../build/build/classes"/>
+ 	       <path refid="xml-apis.classpath"/>
+ 	       <path refid="build-main.classpath"/>
+                <path refid="build-tc5.classpath"/>

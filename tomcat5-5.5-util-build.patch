@@ -1,0 +1,23 @@
+--- connectors/util/build.xml.old	2009-11-09 22:58:14.785750096 +0200
++++ connectors/util/build.xml	2009-11-09 22:59:41.985767951 +0200
+@@ -40,7 +40,7 @@
+     <property name="tomcat-util.lib" value="${tomcat-util.build}/lib" />
+     <property name="tomcat-util.jar" value="${tomcat-util.lib}/tomcat-util.jar" />
+     <property name="tomcat-loader.jar" value="${tomcat-util.lib}/tomcat-loader.jar" />
+-    <property name="tomcat-jni.jar" value="../jni/dist/tomcat-native-1.0.0.jar" />
++    <property name="tomcat-jni.jar" value="../../build/build/server/lib/tomcat-apr.jar" />
+ 
+     <path id="compile.classpath">
+         <pathelement location="${jmx.jar}" />
+@@ -91,7 +91,10 @@
+ 	       verbose="off"
+ 	       excludes="**/CVS/**"
+            encoding="ISO-8859-1">
+-            <classpath refid="compile.classpath"/>
++	    <classpath>
++		<path refid="compile.classpath"/>
++		<pathelement location="${tomcat-util.build}/../../jakarta-tomcat-5/build/classes"/>
++	    </classpath>
+             <exclude name="**/util/net/jsse/*" unless="jsse.present"/>
+             <exclude name="**/util/log/CommonLogHandler.java" unless="commons-logging.present"/>
+             <exclude name="**/util/net/puretls/*" unless="puretls.present"/>
