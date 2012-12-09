@@ -1,5 +1,5 @@
---- container/catalina/src/bin/catalina.sh.old	2009-11-09 21:38:50.014749172 +0200
-+++ container/catalina/src/bin/catalina.sh	2009-11-09 22:57:08.879499256 +0200
+--- container/catalina/src/bin/catalina.sh	2009-07-24 21:36:45.000000000 +0200
++++ container/catalina/src/bin/catalina.sh.oden	2010-02-02 17:20:49.746189142 +0100
 @@ -60,6 +60,11 @@
  Darwin*) darwin=true;;
  esac
@@ -35,8 +35,8 @@
 -  fi
 +if [ -z "$CATALINA_HOME" ]; then
 +    [ -r "$TOMCAT_CFG" ] && . "${TOMCAT_CFG}"
-+ fi
-+
+ fi
+ 
 +### Set up defaults if they were omitted in TOMCAT_CFG
 +###  JVM lookup
 +if [ -z "$JAVA_HOME" ]; then
@@ -79,8 +79,8 @@
 +        echo "Found JAVA_HOME: ${JAVA_HOME}"
 +        echo "Please complete your ${TOMCAT_CFG} so we won't have to look for it next time"
 +    fi
- fi
- 
++fi
++
 +# Set standard commands for invoking Java.
 +_RUNJAVA="$JAVA_HOME"/bin/java
 +_RUNJAVAC="$JAVA_HOME"/bin/javac
@@ -90,8 +90,10 @@
 +CLASSPATH="$JAVA_HOME"/lib/tools.jar
 +
  # Add on extra jar files to CLASSPATH
- if [ ! -z "$CLASSPATH" ] ; then
-   CLASSPATH="$CLASSPATH":
+-if [ ! -z "$CLASSPATH" ] ; then
+-  CLASSPATH="$CLASSPATH":
++if [ -n "$JSSE_HOME" ]; then
++  CLASSPATH="$CLASSPATH":"$JSSE_HOME"/lib/jcert.jar:"$JSSE_HOME"/lib/jnet.jar:"$JSSE_HOME"/lib/jsse.jar
  fi
 -CLASSPATH="$CLASSPATH""$CATALINA_HOME"/bin/bootstrap.jar
 +
@@ -99,7 +101,7 @@
 +if [ -r "$JAVADIR/jsse/jcert.jar" ]; then
 +  CLASSPATH="$CLASSPATH":"$JAVADIR"/jsse/jcert.jar:"$JAVADIR"/jsse/jnet.jar:"$JAVADIR"/jsse/jsse.jar
 +fi
-+        
++
 +CLASSPATH="$CLASSPATH":"$CATALINA_HOME"/bin/bootstrap.jar:"$CATALINA_HOME"/bin/commons-logging-api.jar:`/usr/bin/build-classpath mx4j/mx4j-impl`:`/usr/bin/build-classpath mx4j/mx4j-jmx`
  
  if [ -z "$CATALINA_BASE" ] ; then

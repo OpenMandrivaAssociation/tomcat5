@@ -1,6 +1,6 @@
---- container/catalina/build.xml.old	2009-11-09 23:56:00.957502006 +0200
-+++ container/catalina/build.xml	2009-11-09 23:56:18.278516198 +0200
-@@ -59,7 +59,7 @@
+--- container/catalina/build.xml.sav	2006-03-23 16:46:37.000000000 +0100
++++ container/catalina/build.xml	2006-03-23 16:47:44.000000000 +0100
+@@ -42,7 +42,7 @@
    <property name="tomcat-http11.jar"
             value="${tomcat-http11.home}/build/lib/tomcat-http11.jar"/>
    <property name="tomcat-dbcp.jar" 
@@ -9,9 +9,9 @@
    <!-- Construct Catalina classpath -->
    <path id="catalina.classpath">
      <pathelement location="${activation.jar}"/>
---- container/modules/cluster/build.xml.old	2009-11-09 23:56:39.966376844 +0200
-+++ container/modules/cluster/build.xml	2009-11-09 23:56:56.992748938 +0200
-@@ -37,7 +37,7 @@
+--- container/modules/cluster/build.xml.sav	2006-03-23 16:49:04.000000000 +0100
++++ container/modules/cluster/build.xml	2006-03-23 16:49:54.000000000 +0100
+@@ -20,7 +20,7 @@
      <pathelement location="${commons-modeler.jar}"/>
      <pathelement location="${commons-logging.jar}"/>
      <pathelement location="${jmx.jar}"/>

@@ -1,0 +1,7 @@
+@@@TCLOG@@@/catalina.out {
+    copytruncate
+    weekly
+    rotate 52
+    compress
+    missingok
+}

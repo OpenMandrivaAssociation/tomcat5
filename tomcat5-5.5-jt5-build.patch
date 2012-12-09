@@ -1,6 +1,6 @@
---- build/build.xml.old	2009-11-09 21:33:13.696499356 +0200
-+++ build/build.xml	2009-11-09 21:37:35.892749151 +0200
-@@ -77,9 +77,15 @@
+--- build/build.xml	2010-01-29 17:13:41.228004122 +0100
++++ build/build.xml.oden	2010-01-29 17:19:38.902039644 +0100
+@@ -77,12 +77,14 @@
    <property name="tomcat.release"   value="${basedir}/release"/>
    <property name="webapps.build"    value="${catalina.home}/webapps/build"/>
    <property name="webapps.dist"     value="${catalina.home}/webapps/dist"/>
@@ -9,22 +9,21 @@
    <property name="tomcat-dbcp.jar"
 -       value="${tomcat-dbcp.home}/naming-factory-dbcp.jar"/>
 +       value="${tomcat-dbcp.home}/commons-dbcp.jar"/>
-+  <!--
-+  <property name="jasper-compiler-jdt.home" value="${base.path}/tomcat-deps" />
-+  <property name="jasper-compiler-jdt.jar"
-+       value="${jasper-compiler-jdt.home}/jasper-compiler-jdt.jar"/>
-+  -->
-+
++<!--
    <property name="jasper-compiler-jdt.home" value="${base.path}/tomcat-deps/jdt" />
    <property name="jasper-compiler-jdt.jar"
         value="${jasper-compiler-jdt.home}/jasper-compiler-jdt.jar"/>
-@@ -178,11 +184,17 @@
++-->
+ 
+   <!-- Some compilers will disable debugging if true. And it doesn't do anything
+        in most cases -->
+@@ -178,11 +180,17 @@
              failonerror="false" />
  
      <copy tofile="${tomcat.build}/bin/tomcat-native.tar.gz"
 -            file="${tomcat-native.tar.gz}" />
 +            file="${tomcat-native.tar.gz}"
-+	    failonerror="false" />
++            failonerror="false" />
  
      <!-- <copy todir="${tomcat.build}/common/lib" file="${ant.jar}"/>
      <copy todir="${tomcat.build}/common/lib" file="${ant-launcher.jar}"/> -->
@@ -32,18 +31,18 @@
      <copy todir="${tomcat.build}/common/lib" file="${jasper-compiler-jdt.jar}"/>
 +-->
 +<!-- these should be links -->
-+	<copy todir="${tomcat.build}/common/lib" file="${base.path}/jdtcore.jar" failonerror="false"/>
++       <copy todir="${tomcat.build}/common/lib" file="${base.path}/jdtcore.jar" failonerror="false"/>
 +
    </target>
  
    <!-- ====================== Build all components =================== -->
-@@ -985,7 +997,9 @@
+@@ -987,7 +995,9 @@
      <copy todir="${tomcat.embed}/lib">
        <fileset dir="${tomcat.build}/common/lib">
          <include name="jasper-compiler.jar"/>
 -        <include name="jasper-compiler-jdt.jar"/>
-+	<!-- <include name="jasper-compiler-jdt.jar"/> -->
-+	<include name="jdtcore.jar"/>
++        <!-- <include name="jasper-compiler-jdt.jar"/> -->
++        <include name="jdtcore.jar"/>
 +
        </fileset>
      </copy>

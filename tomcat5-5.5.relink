@@ -1,0 +1,23 @@
+#!/bin/sh
+# Small script that will refresh all tomcat jar repositories
+# (c) Nicolas Mailhot, JPackage project 2003
+# $Id: tomcat5-5.5.relink,v 1.6 2007/05/16 10:57:12 vivekl Exp $
+
+if [ -z "$CATALINA_HOME" ]; then
+    . @@@TCCONF@@@/tomcat5.conf
+fi
+
+# Load JAVA_HOME
+[ -z "$JAVA_HOME" ] && JAVA_HOME=/usr/lib/jvm/java
+
+export JAVA_HOME
+
+# Relink tomcat jar repositories
+for repository in $CATALINA_HOME/common/lib $CATALINA_HOME/common/endorsed \
+                  $CATALINA_HOME/server/lib $CATALINA_HOME/shared/lib ; do
+    rebuild-jar-repository $repository
+done
+
+for webapp in $(find $CATALINA_HOME/webapps -mindepth 1 -maxdepth 2 -type d) ; do
+    [ -d "$webapp/WEB-INF/lib" ] && rebuild-jar-repository $webapp/WEB-INF/lib
+done
