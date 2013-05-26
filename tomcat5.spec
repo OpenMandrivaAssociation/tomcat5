@@ -37,6 +37,10 @@
 %define with_apisonly %{?_with_apisonly:1}%{!?_with_apisonly:0}
 %define without_apisonly %{!?_with_apisonly:1}%{?_with_apisonly:0}
 
+# overwrite until abf get's the feature to pass options
+%define with_apisonly 1
+%define without_apisonly 0
+
 # If you don't want direct ecj support to be built in,
 # while ecj isn't available, give rpmbuild option '--without ecj'
 %define without_ecj %{?_without_ecj:1}%{!?_without_ecj:0}
