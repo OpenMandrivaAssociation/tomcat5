@@ -426,6 +426,9 @@ done
 pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}
     cp -p build/LICENSE .
 popd
+
+export 'ANT_HOME=/usr/share/ant'
+export 'OPT_JAR_LIST=ant/ant-junit junit xmlunit ant/ant-trax jaxp_transform_impl xalan-j2-serializer ant/ant-apache-resolver xml-commons-resolver12'
 # build jspapi and servletapi as ant dist will require them later
 pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi
     pushd jsr154
