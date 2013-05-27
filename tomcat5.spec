@@ -129,6 +129,7 @@ BuildArch: noarch
 Buildrequires: jpackage-utils >= 0:1.7.4
 BuildRequires: java-devel >= 0:1.5.0
 BuildRequires: ant >= 0:1.6.5
+BuildRequires: zip
 %if %{without_apisonly}
 %if %{with_ecj}
 BuildRequires: ecj >= 0:3.3.1.1
@@ -150,7 +151,6 @@ BuildRequires: jakarta-commons-el >= 0:1.0
 BuildRequires: junit >= 0:3.8.1
 BuildRequires: regexp >= 0:1.3
 BuildRequires: xerces-j2 >= 0:2.7.1
-BuildRequires: zip
 BuildRequires: java-rpmbuild
 BuildRequires: struts
 # xml-commons-apis is needed by Xerces-J2
