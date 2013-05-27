@@ -46,6 +46,10 @@
 %define without_ecj %{?_without_ecj:1}%{!?_without_ecj:0}
 %define with_ecj %{!?_without_ecj:1}%{?_without_ecj:0}
 
+# overwrite until abf get's the feature to pass options
+%define without_ecj 1
+%define with_ecj 0
+
 %define full_jname jasper5
 %define jname jasper
 %define majversion 5.5
