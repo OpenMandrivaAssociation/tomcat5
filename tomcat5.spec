@@ -432,12 +432,12 @@ export 'OPT_JAR_LIST=ant/ant-junit junit xmlunit ant/ant-trax jaxp_transform_imp
 # build jspapi and servletapi as ant dist will require them later
 pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}/servletapi
     pushd jsr154
-        %ant -Dservletapi.build="build" \
+        ant -Dservletapi.build="build" \
             -Dservletapi.dist="dist" \
             -Dbuild.compiler="modern" dist
     popd
     pushd jsr152
-        %ant -Dservletapi.build="build" \
+        ant -Dservletapi.build="build" \
             -Dservletapi.dist="dist" \
             -Dbuild.compiler="modern" dist
     popd
