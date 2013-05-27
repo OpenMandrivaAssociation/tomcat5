@@ -103,7 +103,6 @@ BuildRequires: jakarta-commons-el >= 0:1.0
 BuildRequires: junit >= 0:3.8.1
 BuildRequires: regexp >= 0:1.3
 BuildRequires: xerces-j2 >= 0:2.7.1
-BuildRequires: zip
 BuildRequires: java-rpmbuild
 BuildRequires: struts
 # xml-commons-apis is needed by Xerces-J2
@@ -327,7 +326,7 @@ jasper-runtime and ECJ.
 %setup -q -c -T -a 0
 %setup -q -D -T -a 6
 pushd %{packdname}
-%patch0 -p1 -b .p0~
+%patch0 -p0 -b .p0~
 %patch1 -p0 -b .p1~
 %patch2 -p0 -b .p2~
 %patch3 -p0 -b .p3~
