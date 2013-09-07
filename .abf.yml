@@ -1,3 +1,4 @@
 sources:
-  "apache-tomcat-5.5.28-src.tar.gz": 73a61aa067f5f90109ce5667136e6eb5f47d462c
-  "tomcat5-poms-5.5.28.tar.bz2": fe739798441f4a194dac64fda97562a9283a6425
+  apache-tomcat-5.5.28-src.tar.gz: 73a61aa067f5f90109ce5667136e6eb5f47d462c
+  apache-tomcat-5.5.28-src.tar.gz.asc: 9f5c855c830c9e9a474c99770c32e42361c22d4e
+  tomcat5-poms-5.5.28.tar.bz2: fe739798441f4a194dac64fda97562a9283a6425

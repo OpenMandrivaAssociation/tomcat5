@@ -34,7 +34,7 @@
 Name: tomcat5
 Epoch: 0
 Version: %{majversion}.%{minversion}
-Release: 1
+Release: 2
 Summary: Apache Servlet/JSP Engine, RI for Servlet 2.4/JSP 2.0 API
 
 Group: Development/Java
@@ -236,8 +236,8 @@ of the Apache Tomcat JSP API (packages javax.servlet.jsp).
 %package jsp-%{jspspec}-api-javadoc
 Group: Development/Java
 Summary: Javadoc generated documentation for %{name}-jsp-%{jspspec}-api
-Requires(post): /bin/rm
-Requires(post): /bin/ln
+Requires(post): coreutils
+Requires(post): coreutils
 
 %description jsp-%{jspspec}-api-javadoc
 Contains the javadoc generated documentation for the implementation classes
