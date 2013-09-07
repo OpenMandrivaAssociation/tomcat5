@@ -1,6 +1,6 @@
---- build/build.xml	2010-01-29 17:13:41.228004122 +0100
-+++ build/build.xml.oden	2010-01-29 17:19:38.902039644 +0100
-@@ -77,12 +77,14 @@
+--- tomcat5-5.5.35/apache-tomcat-5.5.35-src/build/build.xml.p2~	2013-09-07 11:51:10.250155456 +0200
++++ tomcat5-5.5.35/apache-tomcat-5.5.35-src/build/build.xml	2013-09-07 11:53:20.680767773 +0200
+@@ -84,9 +84,9 @@
    <property name="tomcat.release"   value="${basedir}/release"/>
    <property name="webapps.build"    value="${catalina.home}/webapps/build"/>
    <property name="webapps.dist"     value="${catalina.home}/webapps/dist"/>
@@ -9,41 +9,15 @@
    <property name="tomcat-dbcp.jar"
 -       value="${tomcat-dbcp.home}/naming-factory-dbcp.jar"/>
 +       value="${tomcat-dbcp.home}/commons-dbcp.jar"/>
-+<!--
-   <property name="jasper-compiler-jdt.home" value="${base.path}/tomcat-deps/jdt" />
-   <property name="jasper-compiler-jdt.jar"
-        value="${jasper-compiler-jdt.home}/jasper-compiler-jdt.jar"/>
-+-->
  
    <!-- Some compilers will disable debugging if true. And it doesn't do anything
         in most cases -->
-@@ -178,11 +180,17 @@
-             failonerror="false" />
+@@ -223,7 +223,7 @@
+     <copy todir="${tomcat.build}/server/lib" file="${commons-modeler.jar}" />
  
      <copy tofile="${tomcat.build}/bin/tomcat-native.tar.gz"
 -            file="${tomcat-native.tar.gz}" />
-+            file="${tomcat-native.tar.gz}"
-+            failonerror="false" />
- 
-     <!-- <copy todir="${tomcat.build}/common/lib" file="${ant.jar}"/>
-     <copy todir="${tomcat.build}/common/lib" file="${ant-launcher.jar}"/> -->
-+<!--
-     <copy todir="${tomcat.build}/common/lib" file="${jasper-compiler-jdt.jar}"/>
-+-->
-+<!-- these should be links -->
-+       <copy todir="${tomcat.build}/common/lib" file="${base.path}/jdtcore.jar" failonerror="false"/>
-+
-   </target>
- 
-   <!-- ====================== Build all components =================== -->
-@@ -987,7 +995,9 @@
-     <copy todir="${tomcat.embed}/lib">
-       <fileset dir="${tomcat.build}/common/lib">
-         <include name="jasper-compiler.jar"/>
--        <include name="jasper-compiler-jdt.jar"/>
-+        <!-- <include name="jasper-compiler-jdt.jar"/> -->
-+        <include name="jdtcore.jar"/>
-+
-       </fileset>
-     </copy>
++            file="${tomcat-native.tar.gz}" failonerror="false" />
+     <copy tofile="${tomcat.build}/bin/commons-daemon-native.tar.gz"
+             file="${commons-daemon.native.src.tgz}" />
  

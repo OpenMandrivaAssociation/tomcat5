@@ -8,7 +8,7 @@
 %define full_jname jasper5
 %define jname jasper
 %define majversion 5.5
-%define minversion 28
+%define minversion 36
 %define servletspec 2.4
 %define jspspec 2.0
 
@@ -56,7 +56,6 @@ Patch1: %{name}-%{majversion}-skip-build-on-install.patch
 Patch2: %{name}-%{majversion}-jt5-build.patch
 Patch3: %{name}-%{majversion}-jtc-build.patch
 Patch4: %{name}-%{majversion}-jtj-build.patch
-Patch5: %{name}-%{majversion}-javaxssl.patch
 Patch7: %{name}-%{majversion}-catalina.sh.patch
 Patch8: %{name}-%{majversion}-jasper.sh.patch
 Patch9: %{name}-%{majversion}-jspc.sh.patch
@@ -72,10 +71,6 @@ Patch18: %{name}-%{majversion}-skip-jsp-precompile.patch
 # Seems to be only needed when building with ECJ for java 1.5 since
 # the default source type for ecj is still 1.4
 Patch19: %{name}-%{majversion}-connectors-util-build.patch
-#security fixes
-Patch100: tomcat5-5.5.28-CVE-2009-2693-2901-2902.diff
-Patch101: tomcat5-5.5.28-CVE-2010-2227.diff
-Patch102: tomcat5-5.5.28-CVE-2010-1157.diff
 BuildArch: noarch
 Buildrequires: jpackage-utils >= 0:1.7.4
 BuildRequires: java-devel >= 0:1.5.0
@@ -328,10 +323,9 @@ jasper-runtime and ECJ.
 pushd %{packdname}
 %patch0 -p0 -b .p0~
 %patch1 -p0 -b .p1~
-%patch2 -p0 -b .p2~
+%patch2 -p2 -b .p2~
 %patch3 -p0 -b .p3~
 %patch4 -p0 -b .p4~
-%patch5 -p0 -b .p5~
 %patch7 -p0 -b .p6~
 %patch8 -p0 -b .p7~
 %patch9 -p0 -b .p8~
@@ -350,11 +344,6 @@ pushd %{packdname}
 %endif
 popd
 
-# security fixes
-%patch100 -p1 -b .CVE-2009-2693-2901-2902
-%patch101 -p1 -b .CVE-2010-2227
-%patch102 -p1 -b .CVE-2010-1157
-
 pushd %{packdname}
 %if %{without ecj}
     %{__rm} %{jname}/src/share/org/apache/jasper/compiler/JDTCompiler.java
@@ -368,10 +357,6 @@ popd
 for dir in ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname} ; do
     find $dir \( -name "*.jar" -o -name "*.class" \) | xargs -t %{__rm} -f
 done
-# copy license for later doc files declaration
-pushd ${RPM_BUILD_DIR}/%{name}-%{version}/%{packdname}
-    cp -p build/LICENSE .
-popd
 
 export JAVA_HOME=/usr/lib/jvm/java-openjdk
 export 'ANT_HOME=/usr/share/ant'
@@ -1172,7 +1157,7 @@ fi
 
 %files servlet-%{servletspec}-api
 %defattr(0644,root,root,0755)
-%doc %{packdname}/build/LICENSE
+%doc %{packdname}/LICENSE
 %{_javadir}/%{name}-servlet-%{servletspec}-api*.jar
 %{_javadir}/servletapi5.jar
 %attr(0644,root,root) %{_datadir}/maven2/poms/JPP-tomcat5-servlet-2.4-api.pom
@@ -1184,7 +1169,7 @@ fi
 
 %files jsp-%{jspspec}-api
 %defattr(0644,root,root,0755)
-%doc %{packdname}/build/LICENSE
+%doc %{packdname}/LICENSE
 %{_javadir}/%{name}-jsp-%{jspspec}-api*.jar
 %{_javadir}/jspapi.jar
 %attr(0644,root,root) %{_datadir}/maven2/poms/JPP-tomcat5-jsp-2.0-api.pom
