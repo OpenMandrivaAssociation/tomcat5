@@ -72,10 +72,11 @@ Patch18: %{name}-%{majversion}-skip-jsp-precompile.patch
 # the default source type for ecj is still 1.4
 Patch19: %{name}-%{majversion}-connectors-util-build.patch
 BuildArch: noarch
-Buildrequires: jpackage-utils >= 0:1.7.4
-BuildRequires: java-devel >= 0:1.5.0
-BuildRequires: java-1.6.0-openjdk-devel
-BuildRequires: ant >= 0:1.6.5 xml-commons-apis xerces-j2
+Buildrequires: jpackage-utils
+BuildRequires: java-devel
+BuildRequires: java-rpmbuild
+BuildRequires: javapackages-tools
+BuildRequires: ant xml-commons-apis xerces-j2
 BuildRequires: zip
 %if %{without apisonly}
 %if %{with ecj}
