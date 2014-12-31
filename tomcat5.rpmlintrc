@@ -1,2 +1,0 @@
-addFilter("E: non-readable.*")
-addFilter("E: non-standard-dir-perm.*")
